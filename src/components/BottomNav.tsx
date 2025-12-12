@@ -1,68 +1,100 @@
 "use client";
 
-import { motion } from 'framer-motion';
-import { Home, Search, PlusCircle, Calendar, User } from 'lucide-react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { cn } from '@/lib/utils';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Home, Compass, Users, Calendar, User, LogIn } from "lucide-react";
 
-const navItems = [
-  { icon: Home, label: 'Home', path: '/home' },
-  { icon: Search, label: 'Search', path: '/search' },
-  { icon: PlusCircle, label: 'Create', path: '/create' },
-  { icon: Calendar, label: 'Events', path: '/my-events' },
-  { icon: User, label: 'Profile', path: '/profile' },
-];
+import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export const BottomNav = () => {
   const pathname = usePathname();
+  const { user, isAuthenticated } = useAuth();
+
+  const navItems = [
+    { 
+      label: "Inicio", 
+      href: "/", 
+      icon: Home 
+    },
+    { 
+      label: "Explorar", 
+      href: "/explore", 
+      icon: Compass 
+    },
+    { 
+      label: "Comunidad", 
+      href: "/communities", 
+      icon: Users 
+    },
+    { 
+      label: "Eventos", 
+      href: "/events", 
+      icon: Calendar 
+    },
+  ];
 
   return (
-    <motion.nav
-      initial={{ y: 100 }}
-      animate={{ y: 0 }}
-      className="fixed bottom-4 left-4 right-4 z-50 md:hidden"
-    >
-      <div className="glass rounded-full px-4 py-3 shadow-lg">
-        <div className="flex items-center justify-around">
-          {navItems.map((item) => {
-            const isActive = pathname === item.path;
-            const Icon = item.icon;
+    <div className="fixed bottom-0 left-0 z-50 w-full border-t border-border/40 bg-background/80 backdrop-blur-xl md:hidden">
+      <nav className="flex h-16 items-center justify-around px-2">
+        
+        {/* 1. Items de Navegación Estándar */}
+        {navItems.map((item) => {
+          const isActive = pathname === item.href;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                "flex flex-col items-center justify-center gap-1 rounded-lg p-2 transition-colors",
+                isActive 
+                  ? "text-primary" 
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <item.icon className={cn("h-6 w-6", isActive && "fill-current")} />
+              <span className="text-[10px] font-medium">{item.label}</span>
+            </Link>
+          );
+        })}
 
-            return (
-              <Link
-                key={item.path}
-                href={item.path}
-                className="relative flex flex-col items-center"
-              >
-                <motion.div
-                  className={cn(
-                    'rounded-full p-2 transition-colors',
-                    isActive && 'bg-primary'
-                  )}
-                  whileTap={{ scale: 0.9 }}
-                >
-                  <Icon
-                    className={cn(
-                      'h-6 w-6 transition-colors',
-                      isActive ? 'text-primary-foreground' : 'text-muted-foreground'
-                    )}
-                  />
-                </motion.div>
-                
-                {/* Active Indicator */}
-                {isActive && (
-                  <motion.div
-                    layoutId="activeTab"
-                    className="absolute -bottom-1 h-1 w-1 rounded-full bg-primary"
-                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                  />
-                )}
-              </Link>
-            );
-          })}
-        </div>
-      </div>
-    </motion.nav>
+        {/* 2. Item de Perfil Dinámico */}
+        {isAuthenticated && user ? (
+          // --- USUARIO LOGUEADO: Muestra Avatar ---
+          <Link
+            href={`/profile/${user.id}`}
+            className={cn(
+              "flex flex-col items-center justify-center gap-1 rounded-lg p-2 transition-colors",
+              pathname.startsWith("/profile") 
+                ? "text-primary" 
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Avatar className="h-6 w-6 border border-border">
+              <AvatarImage src={user.avatarUrl || undefined} />
+              <AvatarFallback className="text-[9px]">
+                {user.username.substring(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <span className="text-[10px] font-medium">Yo</span>
+          </Link>
+        ) : (
+          // --- USUARIO NO LOGUEADO: Muestra Login ---
+          <Link
+            href="/login"
+            className={cn(
+              "flex flex-col items-center justify-center gap-1 rounded-lg p-2 transition-colors",
+              pathname === "/login" 
+                ? "text-primary" 
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <LogIn className="h-6 w-6" />
+            <span className="text-[10px] font-medium">Entrar</span>
+          </Link>
+        )}
+      </nav>
+    </div>
   );
 };

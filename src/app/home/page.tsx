@@ -3,51 +3,61 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
-import { EventCard } from '@/components/EventCard';
+
+// Componentes
 import { PostCard } from '@/components/PostCard';
 import { CreatePostWidget } from '@/components/CreatePostWidget';
 import { Sidebar } from '@/components/Sidebar';
 import { BottomNav } from '@/components/BottomNav';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { api } from '@/services/api';
-import { FeedItem, User } from '@/types';
-import { mockUsers } from '@/services/mockData';
+import { useToast } from '@/components/ui/use-toast'; 
+
+// Servicios y Tipos
+import { PostService } from '@/services/post.service'; // Importamos solo PostService
+import { PostDto } from '@/types'; // Importamos el DTO real
 
 const Home = () => {
-  const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
+  // Ahora el estado es estrictamente un array de PostDto
+  const [posts, setPosts] = useState<PostDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [greeting, setGreeting] = useState('');
+  const { toast } = useToast();
 
   useEffect(() => {
-    // Set greeting based on time
+    // 1. Establecer saludo
     const hour = new Date().getHours();
     if (hour < 12) setGreeting('Buenos Días');
     else if (hour < 18) setGreeting('Buenas Tardes');
     else setGreeting('Buenas Noches');
 
-    // Fetch mixed feed
-    fetchFeed();
+    // 2. Cargar posts
+    fetchPosts();
   }, []);
 
-  const fetchFeed = async () => {
+  const fetchPosts = async () => {
     setLoading(true);
-    const data = await api.getFeed();
-    setFeedItems(data);
-    setLoading(false);
-  };
-
-  const getUserById = (userId: string): User => {
-    return mockUsers.find(u => u.id === userId) || mockUsers[0];
+    try {
+      // Llamada directa al servicio de posts
+      // Asumimos que getPosts sin argumentos trae el feed general ordenado por fecha
+      const data = await PostService.getPosts(); 
+      setPosts(data);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudieron cargar las publicaciones.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Sidebar */}
       <Sidebar />
-
-      {/* Main Content */}
       <main className="min-h-screen pb-24 md:ml-72 md:pb-8">
-        {/* Header */}
+        {/* Header con Saludo */}
         <div className="sticky top-0 z-30 border-b border-border/40 bg-background/80 backdrop-blur-xl">
           <div className="mx-auto max-w-2xl px-4 py-6">
             <motion.div
@@ -64,12 +74,14 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Feed */}
+        {/* Feed Area */}
         <ScrollArea className="h-full">
           <div className="mx-auto max-w-2xl px-4 py-6">
-            {/* Create Post Widget */}
+            
+            {/* Widget para crear Post */}
             <div className="mb-6">
-              <CreatePostWidget />
+              {/* Pasamos fetchPosts para recargar la lista al publicar */}
+              <CreatePostWidget onPostCreated={fetchPosts} /> 
             </div>
 
             {/* Loading State */}
@@ -83,35 +95,26 @@ const Home = () => {
                 </motion.div>
               </div>
             ) : (
+              // Lista de Posts
               <div className="space-y-6">
-                {feedItems.map((item, index) => {
-                  if (item.type === 'event') {
-                    return (
-                      <EventCard
-                        key={`event-${item.data.id}`}
-                        event={item.data}
-                        friendsGoing={Math.floor(Math.random() * 10)}
-                        delay={index}
-                      />
-                    );
-                  } else {
-                    const author = getUserById(item.data.authorId);
-                    return (
-                      <PostCard
-                        key={`post-${item.data.id}`}
-                        post={item.data}
-                        author={author}
-                        delay={index}
-                      />
-                    );
-                  }
-                })}
+                {posts.length > 0 ? (
+                  posts.map((post, index) => (
+                    <PostCard
+                      key={`post-${post.id}`}
+                      post={post} // Pasamos el PostDto completo
+                      delay={index}
+                    />
+                  ))
+                ) : (
+                  <div className="text-center py-10 text-muted-foreground">
+                    No hay publicaciones aún. ¡Sé el primero en escribir algo!
+                  </div>
+                )}
               </div>
             )}
           </div>
         </ScrollArea>
 
-        {/* Mobile Navigation */}
         <BottomNav />
       </main>
     </div>

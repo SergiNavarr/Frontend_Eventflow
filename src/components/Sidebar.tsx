@@ -1,123 +1,176 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Home, MessageSquare, Users, Plus } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
-import { api } from '@/services/api';
-import { Community } from '@/types';
-import { mockUsers } from '@/services/mockData';
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { 
+  Home, 
+  Compass, 
+  Users, 
+  Calendar, 
+  User, 
+  LogOut, 
+  LogIn,
+  PlusCircle,
+  Settings
+} from "lucide-react";
+
+import { cn } from "@/lib/utils"; // Asegúrate de tener esta utilidad (típica de shadcn/ui)
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from "@/context/AuthContext";
+import { Separator } from "@/components/ui/separator";
+
+// Definimos los items del menú principal
+const menuItems = [
+  { icon: Home, label: "Inicio", href: "/" },
+  { icon: Compass, label: "Explorar", href: "/explore" },
+  { icon: Users, label: "Comunidades", href: "/communities" },
+  { icon: Calendar, label: "Eventos", href: "/events" },
+];
 
 export const Sidebar = () => {
-  const [communities, setCommunities] = useState<Community[]>([]);
-  const currentUser = mockUsers[0]; // Simulating logged-in user
-
-  useEffect(() => {
-    const fetchCommunities = async () => {
-      const data = await api.getCommunities();
-      setCommunities(data);
-    };
-    fetchCommunities();
-  }, []);
-
-  const navItems = [
-    { icon: Home, label: 'Inicio', active: true },
-    { icon: MessageSquare, label: 'Mensajes', badge: 3 },
-    { icon: Users, label: 'Amigos' },
-  ];
+  const pathname = usePathname();
+  // Extraemos la data y funciones del contexto
+  const { user, isAuthenticated, logout, isLoading } = useAuth();
 
   return (
-    <aside className="fixed left-0 top-0 z-30 hidden h-screen w-72 border-r border-border bg-card/50 backdrop-blur-xl md:block">
-      <ScrollArea className="h-full">
-        <div className="flex flex-col gap-6 p-6">
-          {/* Profile Section */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-3"
-          >
-            <Avatar className="h-12 w-12 ring-2 ring-primary/20">
-              <AvatarImage src={currentUser.avatarUrl} />
-              <AvatarFallback>{currentUser.name[0]}</AvatarFallback>
-            </Avatar>
-            <div className="flex-1">
-              <h3 className="font-semibold text-foreground">{currentUser.name}</h3>
-              <p className="text-xs text-muted-foreground">{currentUser.email}</p>
-            </div>
-          </motion.div>
-
-          <Separator />
-
-          {/* Navigation */}
-          <nav className="space-y-2">
-            {navItems.map((item, index) => (
-              <motion.button
-                key={item.label}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.05 }}
-                className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
-                  item.active
-                    ? 'bg-primary text-primary-foreground shadow-lg'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                }`}
-              >
-                <item.icon className="h-5 w-5" />
-                <span className="flex-1 text-left">{item.label}</span>
-                {item.badge && (
-                  <Badge variant="secondary" className="h-5 min-w-5 px-1.5 text-xs">
-                    {item.badge}
-                  </Badge>
-                )}
-              </motion.button>
-            ))}
-          </nav>
-
-          <Separator />
-
-          {/* My Communities */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-semibold text-foreground">Mis Comunidades</h4>
-            </div>
-
-            <div className="space-y-2">
-              {communities.map((community, index) => (
-                <motion.button
-                  key={community.id}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.05 }}
-                  className="flex w-full items-center gap-3 rounded-xl p-2 text-sm transition-all hover:bg-muted"
-                >
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={community.iconUrl} />
-                    <AvatarFallback>{community.name[0]}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 text-left">
-                    <p className="font-medium text-foreground">{community.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {community.memberCount.toLocaleString()} miembros
-                    </p>
-                  </div>
-                </motion.button>
-              ))}
-            </div>
-
-            {/* Explore Communities Button */}
-            <motion.button
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border py-3 text-sm font-medium text-muted-foreground transition-all hover:border-primary hover:text-primary"
-            >
-              <Plus className="h-4 w-4" />
-              Explorar Comunidades
-            </motion.button>
+    <aside className="fixed left-0 top-0 z-40 hidden h-screen w-72 border-r border-border/40 bg-background/95 backdrop-blur-xl md:flex md:flex-col">
+      
+      {/* 1. Logo */}
+      <div className="flex h-20 items-center px-6">
+        <Link href="/" className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <span className="text-lg font-bold">E</span>
           </div>
+          <span className="text-xl font-bold tracking-tight">EventFlow</span>
+        </Link>
+      </div>
+
+      <div className="flex-1 flex flex-col justify-between px-4 pb-6">
+        
+        {/* 2. Navegación Principal */}
+        <nav className="space-y-2">
+          {menuItems.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link key={item.href} href={item.href}>
+                <Button
+                  variant={isActive ? "secondary" : "ghost"}
+                  className={cn(
+                    "w-full justify-start gap-3 text-base font-normal",
+                    isActive && "font-medium"
+                  )}
+                >
+                  <item.icon className="h-5 w-5" />
+                  {item.label}
+                </Button>
+              </Link>
+            );
+          })}
+
+          {/* Enlace al Perfil Propio (Solo si está logueado) */}
+          {isAuthenticated && (
+            <Link href={`/profile/${user?.id}`}>
+              <Button
+                variant={pathname.startsWith('/profile') ? "secondary" : "ghost"}
+                className="w-full justify-start gap-3 text-base font-normal"
+              >
+                <User className="h-5 w-5" />
+                Perfil
+              </Button>
+            </Link>
+          )}
+        </nav>
+
+        {/* 3. Área de Usuario (Footer del Sidebar) */}
+        <div className="space-y-4">
+          
+          {/* Botón de crear (Opcional, muy útil en sidebars) */}
+          {isAuthenticated && (
+            <Button className="w-full gap-2" size="lg">
+              <PlusCircle className="h-5 w-5" />
+              Nuevo Evento
+            </Button>
+          )}
+
+          <Separator className="bg-border/50" />
+
+          {isLoading ? (
+            // Skeleton / Loading state
+            <div className="flex items-center gap-3 px-2 py-2">
+              <div className="h-10 w-10 animate-pulse rounded-full bg-muted" />
+              <div className="space-y-2">
+                <div className="h-4 w-24 animate-pulse rounded bg-muted" />
+                <div className="h-3 w-16 animate-pulse rounded bg-muted" />
+              </div>
+            </div>
+          ) : isAuthenticated && user ? (
+            // --- ESTADO: LOGUEADO ---
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 px-2">
+                <Avatar className="h-10 w-10 border border-border">
+                  <AvatarImage src={user.avatarUrl || undefined} />
+                  <AvatarFallback className="bg-primary/10 text-primary">
+                    {user.username.substring(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col overflow-hidden">
+                  <span className="truncate text-sm font-medium">
+                    {user.username}
+                  </span>
+                  <span className="truncate text-xs text-muted-foreground">
+                    {user.email}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="grid gap-1">
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
+                  size="sm"
+                >
+                  <Settings className="h-4 w-4" />
+                  Configuración
+                </Button>
+                
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start gap-2 text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/20"
+                  size="sm"
+                  onClick={logout}
+                >
+                  <LogOut className="h-4 w-4" />
+                  Cerrar Sesión
+                </Button>
+              </div>
+            </div>
+          ) : (
+            // --- ESTADO: NO LOGUEADO ---
+            <div className="flex flex-col gap-3 rounded-lg border border-border/50 bg-card p-4">
+              <div className="text-sm font-medium">
+                Únete a EventFlow
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Inicia sesión para interactuar, crear eventos y seguir comunidades.
+              </p>
+              <div className="grid gap-2">
+                <Link href="/login" className="w-full">
+                  <Button variant="outline" size="sm" className="w-full gap-2">
+                    <LogIn className="h-4 w-4" />
+                    Iniciar Sesión
+                  </Button>
+                </Link>
+                <Link href="/register" className="w-full">
+                  <Button size="sm" className="w-full">
+                    Registrarse
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          )}
         </div>
-      </ScrollArea>
+      </div>
     </aside>
   );
 };
