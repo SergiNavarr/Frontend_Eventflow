@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/context/AuthContext";
+import { CreateCommunityDialog } from "@/components/CreateCommunityDialog";
 
 export default function CommunitiesPage() {
   const { isAuthenticated } = useAuth();
@@ -76,10 +77,7 @@ export default function CommunitiesPage() {
 
               {/* Botón Crear (Solo si logueado) */}
               {isAuthenticated && (
-                <Button className="gap-2 shadow-lg shadow-primary/20">
-                  <Plus className="h-4 w-4" />
-                  Crear Comunidad
-                </Button>
+                <CreateCommunityDialog />
               )}
             </div>
 

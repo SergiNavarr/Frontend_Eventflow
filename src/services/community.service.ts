@@ -64,13 +64,16 @@ export const CommunityService = {
    * Saca al usuario actual de la comunidad.
    */
   leaveCommunity: async (communityId: number): Promise<void> => {
-    // Asumiendo un endpoint como DELETE /communities/{id}/join (o leave)
     const response = await fetch(`${API_URL}/communities/${communityId}/leave`, {
       method: 'DELETE',
       headers: getAuthHeaders(),
     });
 
-    if (!response.ok) throw new Error('Error al salir de la comunidad');
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({})); 
+        const message = errorData.message || 'Error al salir de la comunidad';
+        throw new Error(message);
+    }
   },
 
   getAllCommunities: async (): Promise<CommunityDto[]> => {
