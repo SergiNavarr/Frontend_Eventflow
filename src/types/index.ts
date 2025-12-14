@@ -10,6 +10,7 @@ export interface UserProfileDto {
   avatarUrl: string | null;
   followersCount: number;
   followingCount: number;
+  createdAt: string; 
 }
 
 export interface UserLoginDto {

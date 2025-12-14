@@ -26,6 +26,20 @@ export const PostService = {
   },
 
   /**
+   * Obtiene los posts específicos de una comunidad.
+   * Endpoint: GET /api/posts/community/{id}
+   */
+  getPostsByCommunity: async (communityId: number): Promise<PostDto[]> => {
+    const response = await fetch(`${API_URL}/posts/community/${communityId}`, {
+      method: 'GET',
+      headers: getAuthHeaders(), // Importante: el back usa User.FindFirst para ver si le diste like
+    });
+
+    if (!response.ok) throw new Error('Error al obtener posts de la comunidad');
+    return response.json();
+  },
+
+  /**
    * Crea una nueva publicación.
    */
   createPost: async (data: CreatePostDto): Promise<PostDto> => {

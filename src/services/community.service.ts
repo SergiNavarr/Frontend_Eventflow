@@ -2,7 +2,7 @@ import { API_URL, getAuthHeaders } from './api';
 import { CommunityDto, CreateCommunityDto, UpdateCommunityDto } from '@/types'
 
 export const CommunityService = {
-  
+
   /**
    * Obtiene una comunidad por su ID.
    */
@@ -27,8 +27,8 @@ export const CommunityService = {
     });
 
     if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Error al crear la comunidad');
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Error al crear la comunidad');
     }
     return response.json();
   },
@@ -59,7 +59,7 @@ export const CommunityService = {
 
     if (!response.ok) throw new Error('Error al unirse a la comunidad');
   },
-  
+
   /**
    * Saca al usuario actual de la comunidad.
    */
@@ -72,4 +72,15 @@ export const CommunityService = {
 
     if (!response.ok) throw new Error('Error al salir de la comunidad');
   },
+
+  getAllCommunities: async (): Promise<CommunityDto[]> => {
+    const response = await fetch(`${API_URL}/communities`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) throw new Error('Error al obtener comunidades');
+    return response.json();
+  },
+
 };
