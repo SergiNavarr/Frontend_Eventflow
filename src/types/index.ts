@@ -101,9 +101,14 @@ export interface EventChatMessageDto {
   content: string;
   eventId: number;
   senderId: number;
-  senderName?: string; // Seguramente tu backend mapea el nombre del sender
-  senderAvatarUrl?: string;
-  createdAt: string; // BaseEntity suele tener CreatedAt
+  senderName?: string;
+  senderAvatar?: string | null;
+  createdAt: string;
+  isMine?: boolean; // Para saber si el mensaje es del usuario actual
+}
+
+export interface CreateEventMessageDto {
+  content: string;
 }
 
 // --- DTO para Crear un nuevo Evento ---

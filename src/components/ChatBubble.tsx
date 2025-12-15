@@ -1,41 +1,54 @@
 import { motion } from 'framer-motion';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Comment, User } from '@/types';
+import { EventChatMessageDto } from '@/types'; // Importamos el tipo nuevo
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { User } from 'lucide-react';
 
 interface ChatBubbleProps {
-  comment: Comment;
-  user: User;
-  isCurrentUser?: boolean;
+  message: EventChatMessageDto;
 }
 
-export const ChatBubble = ({ comment, user, isCurrentUser = false }: ChatBubbleProps) => {
+export const ChatBubble = ({ message }: ChatBubbleProps) => {
+  const isCurrentUser = message.isMine;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className={cn('flex gap-3', isCurrentUser && 'flex-row-reverse')}
+      className={cn(
+        'flex gap-3 w-full', 
+        isCurrentUser ? 'flex-row-reverse' : 'flex-row'
+      )}
     >
-      <Avatar className="h-8 w-8 flex-shrink-0">
-        <AvatarImage src={user.avatarUrl} alt={user.name} />
-        <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+      {/* Avatar */}
+      <Avatar className="h-8 w-8 flex-shrink-0 mt-1 border border-border/50">
+        <AvatarImage src={message.senderAvatar || undefined} alt={message.senderName} />
+        <AvatarFallback className="bg-muted text-[10px]">
+           {message.senderName ? message.senderName.substring(0, 2).toUpperCase() : <User className="h-4 w-4"/>}
+        </AvatarFallback>
       </Avatar>
 
-      <div className={cn('flex flex-col gap-1', isCurrentUser && 'items-end')}>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span className="font-medium">{user.name}</span>
-          <span>{format(comment.timestamp, 'h:mm a')}</span>
+      {/* Contenido del Mensaje */}
+      <div className={cn('flex flex-col gap-1 max-w-[75%]', isCurrentUser ? 'items-end' : 'items-start')}>
+        
+        {/* Nombre y Hora */}
+        <div className={cn("flex items-center gap-2 text-[10px] text-muted-foreground", isCurrentUser && "flex-row-reverse")}>
+          <span className="font-medium opacity-90">{message.senderName}</span>
+          <span>{format(new Date(message.createdAt), 'h:mm a')}</span>
         </div>
         
+        {/* Burbuja */}
         <div
           className={cn(
-            'glass max-w-xs rounded-2xl px-4 py-2',
-            isCurrentUser ? 'bg-primary/20' : 'bg-card/50'
+            'px-4 py-2 rounded-2xl shadow-sm text-sm break-words',
+            isCurrentUser 
+              ? 'bg-primary text-primary-foreground rounded-tr-sm' // Mío: Color primario, esquina superior derecha recta
+              : 'bg-card border border-border/50 text-foreground rounded-tl-sm' // Otro: Color tarjeta, esquina superior izquierda recta
           )}
         >
-          <p className="text-sm text-foreground">{comment.text}</p>
+          <p className="leading-relaxed">{message.content}</p>
         </div>
       </div>
     </motion.div>

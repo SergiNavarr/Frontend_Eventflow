@@ -16,6 +16,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 // Importamos los sub-componentes
 import { EventHeader } from "@/components/EventHeader"; // Ajusta la ruta según donde los guardes
 import { EventInfo } from "@/components/EventInfo"; 
+import { EventChat } from "@/components/EventChat";
 
 export default function EventDetailPage() {
   const params = useParams();
@@ -91,9 +92,7 @@ export default function EventDetailPage() {
                   </TabsContent>
 
                   <TabsContent value="chat" className="mt-0">
-                    <div className="p-8 text-center text-muted-foreground border border-dashed rounded-lg">
-                      Próximamente: Chat del Evento
-                    </div>
+                    <EventChat eventId={event.id} />
                   </TabsContent>
 
                   <TabsContent value="tasks" className="mt-0">
