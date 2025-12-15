@@ -22,8 +22,6 @@ export const EventInfo = ({ event, attendees, onJoinChange }: EventInfoProps) =>
 
   const isJoined = Boolean(event.myRsvpStatus);
   
-  // 1. Lógica de "Evento Lleno"
-  // Solo está lleno si hay límite definido Y los asistentes lo alcanzan (o superan)
   const isFull = event.maxAttendees 
     ? event.attendeesCount >= event.maxAttendees 
     : false;

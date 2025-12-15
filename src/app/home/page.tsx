@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles } from 'lucide-react';
+import { Loader2, Sparkles } from 'lucide-react';
 
 // Componentes
 import { PostCard } from '@/components/PostCard';
@@ -10,17 +10,21 @@ import { CreatePostWidget } from '@/components/CreatePostWidget';
 import { Sidebar } from '@/components/Sidebar';
 import { BottomNav } from '@/components/BottomNav';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useToast } from '@/components/ui/use-toast'; 
+import { useToast } from '@/components/ui/use-toast';
 
 // Servicios y Tipos
 import { PostService } from '@/services/post.service'; // Importamos solo PostService
 import { PostDto } from '@/types'; // Importamos el DTO real
+import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 
 const Home = () => {
   // Ahora el estado es estrictamente un array de PostDto
   const [posts, setPosts] = useState<PostDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [greeting, setGreeting] = useState('');
+  const [page, setPage] = useState(1);         // Página actual a pedir
+  const [hasMore, setHasMore] = useState(true); // ¿Quedan posts por cargar?
+  const [loadingMore, setLoadingMore] = useState(false); // Spinner pequeño inferior
   const { toast } = useToast();
 
   useEffect(() => {
@@ -35,12 +39,21 @@ const Home = () => {
   }, []);
 
   const fetchPosts = async () => {
-    setLoading(true);
+    setLoading(true); // Spinner grande de carga inicial
     try {
-      // Llamada directa al servicio de posts
-      // Asumimos que getPosts sin argumentos trae el feed general ordenado por fecha
-      const data = await PostService.getPosts(); 
+      // 1. Siempre pedimos la página 1 al iniciar/refrescar
+      const PAGE_SIZE = 2;
+      const data = await PostService.getFeedPosts(1, PAGE_SIZE);
+
       setPosts(data);
+
+      if (data.length < PAGE_SIZE) {
+        setHasMore(false);
+      } else {
+        setHasMore(true);
+        setPage(2);
+      }
+
     } catch (error) {
       console.error('Error fetching posts:', error);
       toast({
@@ -52,6 +65,37 @@ const Home = () => {
       setLoading(false);
     }
   };
+
+  const handleLoadMore = async () => {
+    // Evitamos llamadas dobles o si ya no hay más datos
+    if (loadingMore || !hasMore) return;
+
+    setLoadingMore(true);
+    try {
+      const PAGE_SIZE = 2;
+
+      const data = await PostService.getFeedPosts(page, PAGE_SIZE);
+
+      setPosts((prevPosts) => [...prevPosts, ...data]);
+
+      if (data.length < PAGE_SIZE) {
+        setHasMore(false);
+      } else {
+        setPage((prevPage) => prevPage + 1);
+      }
+
+    } catch (error) {
+      toast({ title: 'Error', description: 'No se pudieron cargar más posts.', variant: 'destructive' });
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  const loadMoreRef = useIntersectionObserver(() => {
+    if (!loadingMore && hasMore) {
+      handleLoadMore();
+    }
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -77,20 +121,21 @@ const Home = () => {
         {/* Feed Area */}
         <ScrollArea className="h-full">
           <div className="mx-auto max-w-2xl px-4 py-6">
-            
+
             {/* Widget para crear Post */}
             <div className="mb-6">
-              {/* Pasamos fetchPosts para recargar la lista al publicar */}
-              <CreatePostWidget onPostCreated={fetchPosts} /> 
+              {/* Al crear un post, fetchPosts recarga la página 1 y resetea la lista */}
+              <CreatePostWidget onPostCreated={fetchPosts} />
             </div>
 
-            {/* Loading State */}
+            {/* Loading State (Carga Inicial) */}
             {loading ? (
               <div className="flex min-h-[400px] items-center justify-center">
                 <motion.div
                   animate={{ rotate: 360 }}
                   transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                 >
+                  {/* Asegúrate de tener importado Sparkles o Loader2 */}
                   <Sparkles className="h-12 w-12 text-primary" />
                 </motion.div>
               </div>
@@ -98,14 +143,38 @@ const Home = () => {
               // Lista de Posts
               <div className="space-y-6">
                 {posts.length > 0 ? (
-                  posts.map((post, index) => (
-                    <PostCard
-                      key={`post-${post.id}`}
-                      post={post} // Pasamos el PostDto completo
-                      delay={index}
-                    />
-                  ))
+                  <>
+                    {posts.map((post, index) => (
+                      <PostCard
+                        key={`post-${post.id}`} // Usar ID único es mejor que index
+                        post={post}
+                        delay={index * 0.05} // Pequeño ajuste para que no sea tan lento si hay muchos
+                      />
+                    ))}
+
+                    {/* --- DETECTOR DE SCROLL INFINITO --- */}
+                    {/* Solo se renderiza si el backend dice que hay más páginas */}
+                    {hasMore && (
+                      <div
+                        ref={loadMoreRef}
+                        className="flex items-center justify-center py-8 min-h-[60px]"
+                      >
+                        {/* Spinner inferior para cuando carga la siguiente página */}
+                        {loadingMore && (
+                          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                        )}
+                      </div>
+                    )}
+
+                    {/* Mensaje de Fin de Lista */}
+                    {!hasMore && posts.length > 5 && (
+                      <p className="text-center text-xs text-muted-foreground py-4">
+                        Has llegado al final. 🚀
+                      </p>
+                    )}
+                  </>
                 ) : (
+                  // Estado Vacío (Solo si no hay posts y no está cargando)
                   <div className="text-center py-10 text-muted-foreground">
                     No hay publicaciones aún. ¡Sé el primero en escribir algo!
                   </div>

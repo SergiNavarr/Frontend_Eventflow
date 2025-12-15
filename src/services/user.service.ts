@@ -50,5 +50,52 @@ export const UserService = {
 
     if (!response.ok) throw new Error('Error al actualizar perfil');
     return response.json();
+  },
+  //SEGUIR USUARIO
+  followUser: async (userId: number): Promise<void> => {
+    const response = await fetch(`${API_URL}/users/${userId}/follow`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || "Error al seguir al usuario.");
+    }
+  },
+
+  //DEJAR DE SEGUIR
+  unfollowUser: async (userId: number): Promise<void> => {
+    const response = await fetch(`${API_URL}/users/${userId}/follow`, {
+      method: "DELETE",
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || "Error al dejar de seguir.");
+    }
+  },
+
+  // OBTENER SEGUIDORES
+  getFollowers: async (userId: number): Promise<UserProfileDto[]> => {
+    const response = await fetch(`${API_URL}/users/${userId}/followers`, {
+      method: "GET",
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) throw new Error("Error al cargar seguidores.");
+    return response.json();
+  },
+
+  // OBTENER SEGUIDOS
+  getFollowing: async (userId: number): Promise<UserProfileDto[]> => {
+    const response = await fetch(`${API_URL}/users/${userId}/following`, {
+      method: "GET",
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) throw new Error("Error al cargar seguidos.");
+    return response.json();
   }
 };

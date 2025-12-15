@@ -1,3 +1,4 @@
+import { get } from 'http';
 import { API_URL, getAuthHeaders } from './api';
 import { PostDto, CreatePostDto, UpdatePostDto } from '@/types'
 
@@ -15,7 +16,7 @@ export const PostService = {
     if (query?.userId) {
       params.append('userId', query.userId.toString());
     }
-    
+
     const response = await fetch(`${API_URL}/posts?${params.toString()}`, {
       method: 'GET',
       headers: getAuthHeaders(), // Incluye Auth para obtener IsLikedByMe
@@ -50,8 +51,8 @@ export const PostService = {
     });
 
     if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Error al crear la publicación');
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Error al crear la publicación');
     }
     return response.json();
   },
@@ -81,7 +82,7 @@ export const PostService = {
 
     if (!response.ok) throw new Error('Error al eliminar la publicación');
   },
-  
+
   // Función de interacción adicional
   likePost: async (postId: number): Promise<void> => {
     const response = await fetch(`${API_URL}/posts/${postId}/like`, {
@@ -90,5 +91,23 @@ export const PostService = {
     });
 
     if (!response.ok) throw new Error('Error al dar "me gusta"');
+  },
+
+  // Función para seguir gente
+
+  // Función para obtener el feed de home
+  getFeedPosts: async (page: number = 1, pageSize: number = 10): Promise<PostDto[]> => {
+    // Construimos los query params para la paginación
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('pageSize', pageSize.toString());
+
+    const response = await fetch(`${API_URL}/posts/feed?${params.toString()}`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) throw new Error('Error al obtener el feed');
+    return response.json();
   },
 };

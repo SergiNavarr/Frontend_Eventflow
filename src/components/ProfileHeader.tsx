@@ -8,6 +8,7 @@ import { CalendarDays, MapPin, Users, Edit, UserPlus, Check } from "lucide-react
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useState } from "react";
+import { UserService } from "@/services/user.service";
 
 interface ProfileHeaderProps {
   profile: UserProfileDto;
@@ -20,7 +21,11 @@ export const ProfileHeader = ({ profile, isOwnProfile }: ProfileHeaderProps) => 
   // Función placeholder para seguir/dejar de seguir
   const handleFollowToggle = () => {
     setIsFollowing(!isFollowing);
-    // Aquí llamaríamos a UserService.follow(profile.id)
+    if(!isFollowing) {
+      UserService.followUser(profile.id);
+    } else {
+      UserService.unfollowUser(profile.id);
+    }
   };
 
   return (
@@ -88,13 +93,7 @@ export const ProfileHeader = ({ profile, isOwnProfile }: ProfileHeaderProps) => 
           )}
 
           {/* Metadatos (Fecha, Ubicación, etc.) */}
-          <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
-            {/* Ejemplo estático, si el back tuviera location se pondría aquí */}
-            {/* <div className="flex items-center gap-1">
-              <MapPin className="h-4 w-4" />
-              <span>Argentina</span>
-            </div> */}
-            
+          <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">         
             <div className="flex items-center gap-1">
               <CalendarDays className="h-4 w-4" />
               <span>Se unió en {format(new Date(profile.createdAt), "MMMM yyyy", { locale: es })}</span>

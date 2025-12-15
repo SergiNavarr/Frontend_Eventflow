@@ -7,14 +7,13 @@ import {
   startOfMonth, 
   endOfMonth, 
   eachDayOfInterval, 
-  isSameMonth, 
   isSameDay, 
   addMonths, 
   subMonths, 
   isToday
 } from "date-fns";
 import { es } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Loader2, MapPin } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Loader2} from "lucide-react";
 
 import { EventService } from "@/services/event.service";
 import { EventDto } from "@/types";

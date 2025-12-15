@@ -30,7 +30,7 @@ export const BottomNav = () => {
     },
     { 
       label: "Eventos", 
-      href: "/events", 
+      href: "/event", 
       icon: Calendar 
     },
   ];

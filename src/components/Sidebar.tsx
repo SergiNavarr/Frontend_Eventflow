@@ -19,7 +19,6 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/context/AuthContext";
 import { Separator } from "@/components/ui/separator";
-import { CreateEventDialog } from "./CreateEventDialog";
 
 // Definimos los items del menú principal
 const menuItems = [
