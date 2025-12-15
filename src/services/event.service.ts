@@ -2,20 +2,6 @@ import { API_URL, getAuthHeaders } from './api';
 import { EventDto, CreateEventDto, UpdateEventDto } from '@/types'
 
 export const EventService = {
-
-  /**
-   * Obtiene un evento por su ID.
-   */
-  getEvent: async (eventId: number): Promise<EventDto> => {
-    const response = await fetch(`${API_URL}/events/${eventId}`, {
-      method: 'GET',
-      headers: getAuthHeaders(), // Para obtener MyRsvpStatus
-    });
-
-    if (!response.ok) throw new Error('Error al obtener el evento');
-    return response.json();
-  },
-
   /**
    * Crea un nuevo evento.
    */
@@ -47,18 +33,51 @@ export const EventService = {
     return response.json();
   },
 
-  /**
-   * Establece el estado de RSVP del usuario.
-   * @param status El estado de asistencia (ej: "Going", "Maybe", "NotGoing")
-   */
-  setRsvpStatus: async (eventId: number, status: string): Promise<void> => {
-    // Asumiendo un endpoint como POST /events/{eventId}/rsvp
-    const response = await fetch(`${API_URL}/events/${eventId}/rsvp`, {
-      method: 'POST',
+  getById: async (id: number): Promise<EventDto> => {
+    const response = await fetch(`${API_URL}/events/${id}`, {
       headers: getAuthHeaders(),
-      body: JSON.stringify({ status }),
+    });
+    if (!response.ok) throw new Error("Error al cargar el evento");
+    return response.json();
+  },
+
+  // POST: api/events/{id}/join
+  joinEvent: async (eventId: number): Promise<void> => {
+    const response = await fetch(`${API_URL}/events/${eventId}/join`, {
+      method: "POST",
+      headers: getAuthHeaders(),
     });
 
-    if (!response.ok) throw new Error('Error al actualizar la asistencia');
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || "No se pudo unir al evento");
+    }
+  },
+
+  // POST: api/events/{id}/leave
+  leaveEvent: async (eventId: number): Promise<void> => {
+    const response = await fetch(`${API_URL}/events/${eventId}/leave`, {
+      method: "POST", // Coincide con [HttpPost("{id}/leave")] en tu controller
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) throw new Error("No se pudo salir del evento");
+  },
+
+  // Endpoint de asistentes (Opcional, si lo implementas a futuro)
+  getAttendees: async (eventId: number) => {
+      // EventsController actual NO tiene endpoint de asistentes,
+      // así que devolvemos vacío para que no rompa la UI.
+      return []; 
+  },
+
+  // Endpoint para obtener eventos del calendario del usuario
+  getMyCalendarEvents: async (): Promise<EventDto[]> => {
+    const response = await fetch(`${API_URL}/events/calendar`, {
+      method: "GET",
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) throw new Error("Error al cargar el calendario");
+    return response.json();
   },
 };

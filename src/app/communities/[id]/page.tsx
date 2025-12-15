@@ -16,6 +16,7 @@ import { CreatePostWidget } from "@/components/CreatePostWidget";
 import { CommunityHeader } from "@/components/CommunityHeader";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/components/ui/use-toast";
+import { CreateEventDialog } from "@/components/CreateEventDialog";
 
 export default function CommunityDetailPage() {
   const params = useParams();
@@ -31,15 +32,14 @@ export default function CommunityDetailPage() {
   // Usamos useCallback para poder pasar esta función al hijo sin problemas de re-render
   const fetchData = useCallback(async () => {
     if (!communityId) return;
-    
+
     // No ponemos setLoading(true) aquí para evitar parpadeos bruscos al recargar tras unirse
     // Solo la primera vez si loading es true
-    
+
     try {
       const [communityData, communityPosts] = await Promise.all([
         CommunityService.getCommunity(communityId),
-        // CAMBIO AQUÍ: Usamos el método específico
-        PostService.getPostsByCommunity(communityId) 
+        PostService.getPostsByCommunity(communityId)
       ]);
 
       setCommunity(communityData);
@@ -78,31 +78,38 @@ export default function CommunityDetailPage() {
       <main className="min-h-screen pb-24 md:ml-72 md:pb-8">
         <ScrollArea className="h-full">
           <div className="mx-auto max-w-3xl">
-            
+
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-              <CommunityHeader 
-                community={community} 
+              <CommunityHeader
+                community={community}
                 onJoinChange={fetchData} // Al cambiar estado, recarga TODO (incluyendo isMember del padre)
               />
             </motion.div>
 
             <div className="px-4 pb-10">
-              
+
               {/* Lógica del Widget: */}
               {/* Si community.isMember es true (que viene del backend), se muestra */}
               {community.isMember && (
                 <div className="mb-8">
-                  <CreatePostWidget 
+                  <CreatePostWidget
                     communityId={community.id}
-                    onPostCreated={fetchData} 
+                    onPostCreated={fetchData}
                   />
+                </div>
+              )}
+              {community.isMember && (
+                <div className="mb-6 flex justify-between items-center">
+                  <h2 className="text-xl font-bold">Actividad</h2>
+                  {/* Pasamos el ID de la comunidad para que el evento se vincule automáticamente */}
+                  <CreateEventDialog communityId={community.id} />
                 </div>
               )}
 
               <h2 className="mb-4 text-lg font-semibold text-foreground">
                 Discusión
               </h2>
-              
+
               <div className="space-y-6">
                 {posts.length > 0 ? (
                   posts.map((post, index) => (

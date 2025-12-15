@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { 
-  Home, 
-  Compass, 
-  Users, 
-  Calendar, 
-  User, 
-  LogOut, 
+import {
+  Home,
+  Compass,
+  Users,
+  Calendar,
+  User,
+  LogOut,
   LogIn,
   PlusCircle,
   Settings
@@ -19,13 +19,14 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/context/AuthContext";
 import { Separator } from "@/components/ui/separator";
+import { CreateEventDialog } from "./CreateEventDialog";
 
 // Definimos los items del menú principal
 const menuItems = [
   { icon: Home, label: "Inicio", href: "/" },
   { icon: Compass, label: "Explorar", href: "/explore" },
   { icon: Users, label: "Comunidades", href: "/communities" },
-  { icon: Calendar, label: "Eventos", href: "/events" },
+  { icon: Calendar, label: "Eventos", href: "/event" },
 ];
 
 export const Sidebar = () => {
@@ -35,7 +36,7 @@ export const Sidebar = () => {
 
   return (
     <aside className="fixed left-0 top-0 z-40 hidden h-screen w-72 border-r border-border/40 bg-background/95 backdrop-blur-xl md:flex md:flex-col">
-      
+
       {/* 1. Logo */}
       <div className="flex h-20 items-center px-6">
         <Link href="/" className="flex items-center gap-2">
@@ -47,7 +48,7 @@ export const Sidebar = () => {
       </div>
 
       <div className="flex-1 flex flex-col justify-between px-4 pb-6">
-        
+
         {/* 2. Navegación Principal */}
         <nav className="space-y-2">
           {menuItems.map((item) => {
@@ -84,14 +85,6 @@ export const Sidebar = () => {
 
         {/* 3. Área de Usuario (Footer del Sidebar) */}
         <div className="space-y-4">
-          
-          {/* Botón de crear (Opcional, muy útil en sidebars) */}
-          {isAuthenticated && (
-            <Button className="w-full gap-2" size="lg">
-              <PlusCircle className="h-5 w-5" />
-              Nuevo Evento
-            </Button>
-          )}
 
           <Separator className="bg-border/50" />
 
@@ -123,19 +116,19 @@ export const Sidebar = () => {
                   </span>
                 </div>
               </div>
-              
+
               <div className="grid gap-1">
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
                   size="sm"
                 >
                   <Settings className="h-4 w-4" />
                   Configuración
                 </Button>
-                
-                <Button 
-                  variant="ghost" 
+
+                <Button
+                  variant="ghost"
                   className="w-full justify-start gap-2 text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/20"
                   size="sm"
                   onClick={logout}

@@ -69,33 +69,41 @@ export interface UpdatePostDto {
   content: string;              // Required
   imageUrl?: string | null;     // C# string?. Aquí lo hacemos opcional en el envío
 }
+
 // --- DTO para la Respuesta del Backend (El Evento Completo) ---
 export interface EventDto {
-  // Propiedades principales
   id: number;
   title: string;
   description: string;
-  startDateTime: string;          // C# DateTime
-  endDateTime: string | null;     // C# DateTime?
+  startDateTime: string; // Backend: DateTime
+  endDateTime?: string | null; // Backend: DateTime?
   location: string;
   isOnline: boolean;
-  coverImageUrl: string | null;   // C# string?
-  maxAttendees: number | null;    // C# int?
+  coverImageUrl?: string | null;
+  maxAttendees?: number | null;
 
-  // Organizador
+  // Datos del Organizador y Comunidad (Flat properties del MapToDto)
   organizerId: number;
   organizerName: string;
-  organizerAvatar: string | null; // C# string?
+  communityId?: number | null;
+  communityName?: string | null;
 
-  // Comunidad (Puede ser nulo)
-  communityId: number | null;     // C# int?
-  communityName: string | null;   // C# string?
-
-  // Estadísticas
+  // Estadísticas y Estado
   attendeesCount: number;
+  
+  // Backend devuelve "Going" si asistes, o null si no.
+  myRsvpStatus?: string | null; 
+}
 
-  // Estado del usuario actual
-  myRsvpStatus: string | null;    // C# string? (Ej: "Going", "Maybe", "NotGoing")
+// DTO para el Chat del Evento
+export interface EventChatMessageDto {
+  id: number;
+  content: string;
+  eventId: number;
+  senderId: number;
+  senderName?: string; // Seguramente tu backend mapea el nombre del sender
+  senderAvatarUrl?: string;
+  createdAt: string; // BaseEntity suele tener CreatedAt
 }
 
 // --- DTO para Crear un nuevo Evento ---
