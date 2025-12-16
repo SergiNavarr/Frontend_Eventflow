@@ -99,8 +99,7 @@ export const PostCard = ({ post, delay = 0 }: PostCardProps) => {
             </Avatar>
 
             <div className="flex flex-col">
-              {/* Agregamos group-hover:underline para efecto visual */}
-              <span className="font-semibold text-foreground text-sm group-hover:underline decoration-primary decoration-2 underline-offset-2">
+              <span className="font-semibold text-foreground text-sm group-hover:underline decoration-secondary decoration-2 underline-offset-2">
                 {post.authorName}
               </span>
               <span className="text-xs text-muted-foreground">
@@ -110,6 +109,24 @@ export const PostCard = ({ post, delay = 0 }: PostCardProps) => {
                 })}
               </span>
             </div>
+
+            {post.communityId && post.communityName && (
+              <div className="mb-3">
+                <Link href={`/communities/${post.communityId}`}>
+                  <Badge
+                    variant="secondary"
+                    className="cursor-pointer hover:bg-secondary/80 transition-colors gap-1 pl-2 pr-3 py-1 text-foreground"
+                  >
+                    {/* Icono de Usuarios para representar Comunidad */}
+                    <Users className="h-3 w-3" />
+
+                    <span className="font-normal ml-1">Comunidad:</span>
+
+                    <span className="font-bold ml-1">{post.communityName}</span>
+                  </Badge>
+                </Link>
+              </div>
+            )}
           </Link>
         </CardHeader>
 
@@ -119,8 +136,8 @@ export const PostCard = ({ post, delay = 0 }: PostCardProps) => {
             <div className="mb-2 rounded-md bg-primary/5 border border-primary/10 p-2 flex items-center gap-2 text-sm text-primary">
               <Link href={`/event/${post.eventId}`}>
                 <Badge
-                  variant="secondary"
-                  className="cursor-pointer hover:bg-secondary/80 transition-colors gap-1 pl-2 pr-3 py-1 text-foreground"
+                  variant="default"
+                  className="cursor-pointer hover:bg-default/80 transition-colors gap-1 pl-2 pr-3 py-1 text-foreground"
                 >
                   <Calendar className="h-3 w-3" />
 
@@ -134,23 +151,7 @@ export const PostCard = ({ post, delay = 0 }: PostCardProps) => {
             </div>
           )}
 
-          {post.communityId && post.communityName && (
-            <div className="mb-3">
-              <Link href={`/communities/${post.communityId}`}>
-                <Badge
-                  variant="secondary"
-                  className="cursor-pointer hover:bg-secondary/80 transition-colors gap-1 pl-2 pr-3 py-1 text-foreground"
-                >
-                  {/* Icono de Usuarios para representar Comunidad */}
-                  <Users className="h-3 w-3" />
 
-                  <span className="font-normal ml-1">Comunidad:</span>
-
-                  <span className="font-bold ml-1">{post.communityName}</span>
-                </Badge>
-              </Link>
-            </div>
-          )}
 
           {/* Contenido Texto */}
           <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">
@@ -177,11 +178,10 @@ export const PostCard = ({ post, delay = 0 }: PostCardProps) => {
             <Button
               variant="ghost"
               size="sm"
-              className={`gap-2 ${
-                isLiked
+              className={`gap-2 ${isLiked
                   ? "text-red-500 hover:text-red-600 hover:bg-red-50"
                   : "text-muted-foreground hover:text-primary"
-              }`}
+                }`}
               onClick={handleLike}
               disabled={isLikeLoading}
             >
