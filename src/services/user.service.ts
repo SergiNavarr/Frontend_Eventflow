@@ -104,4 +104,14 @@ export const UserService = {
     if (!response.ok) throw new Error("Error al cargar seguidos.");
     return response.json();
   },
+
+  // Buscar usuarios
+  searchUsers: async (query: string): Promise<UserProfileDto[]> => {
+    if (!query) return [];
+    const response = await fetch(`${API_URL}/users/search?query=${encodeURIComponent(query)}`, {
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) return [];
+    return response.json();
+  },
 };

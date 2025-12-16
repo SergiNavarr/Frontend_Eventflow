@@ -1,28 +1,18 @@
 import { motion } from 'framer-motion';
 import { Calendar, MapPin, Users } from 'lucide-react';
-import { Event } from '@/types';
+import { EventDto } from '@/types';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 import Link from 'next/link';
 
 interface EventCardProps {
-  event: Event;
-  friendsGoing?: number;
+  event: EventDto;
   delay?: number;
 }
 
-const categoryColors: Record<Event['category'], string> = {
-  party: 'bg-secondary',
-  tech: 'bg-primary',
-  sports: 'bg-green-500',
-  music: 'bg-purple-500',
-  food: 'bg-orange-500',
-  art: 'bg-pink-500',
-  networking: 'bg-blue-500',
-};
-
-export const EventCard = ({ event, friendsGoing = 0, delay = 0 }: EventCardProps) => {
+export const EventCard = ({ event, delay = 0 }: EventCardProps) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -30,66 +20,61 @@ export const EventCard = ({ event, friendsGoing = 0, delay = 0 }: EventCardProps
       transition={{ duration: 0.6, delay: delay * 0.1 }}
     >
       <Link href={`/event/${event.id}`}>
-        <Card className="glass glass-hover overflow-hidden rounded-2xl border-0 p-0 transition-all duration-300 hover:scale-[1.02]">
-          {/* Image */}
+        <Card className="group overflow-hidden rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:border-primary/50">
+          
+          {/* Imagen de Portada */}
           <div className="relative aspect-[4/3] overflow-hidden">
             <motion.img
-              src={event.imageUrl}
+              src={event.coverImageUrl || '/placeholder.svg'}
               alt={event.title}
-              className="h-full w-full object-cover"
-              whileHover={{ scale: 1.05 }}
-              transition={{ duration: 0.3 }}
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
-            {/* Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
             
-            {/* Price Tag */}
-            {event.price > 0 && (
-              <div className="absolute right-3 top-3 glass rounded-full px-3 py-1">
-                <span className="text-sm font-bold text-foreground">${event.price}</span>
-              </div>
-            )}
-            
-            {/* Category Badge */}
             <div className="absolute left-3 top-3">
-              <Badge className={`${categoryColors[event.category]} border-0 text-white`}>
-                {event.category.toUpperCase()}
+              <Badge variant={event.isOnline ? "secondary" : "default"} className="font-semibold shadow-sm">
+                {event.isOnline ? 'Online' : 'Presencial'}
               </Badge>
             </div>
           </div>
 
-          {/* Content */}
+          {/* Contenido */}
           <div className="space-y-3 p-5">
-            <h3 className="line-clamp-1 text-xl font-bold text-foreground">
+            <h3 className="line-clamp-1 text-lg font-bold text-foreground group-hover:text-primary transition-colors">
               {event.title}
             </h3>
             
-            <p className="line-clamp-2 text-sm text-muted-foreground">
+            <p className="line-clamp-2 text-sm text-muted-foreground min-h-[40px]">
               {event.description}
             </p>
 
             {/* Meta Info */}
-            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-              <div className="flex items-center gap-1.5">
-                <Calendar className="h-4 w-4" />
-                <span>{format(event.date, 'MMM d, h:mm a')}</span>
-              </div>
-              
-              <div className="flex items-center gap-1.5">
-                <MapPin className="h-4 w-4" />
-                <span className="line-clamp-1">{event.location}</span>
-              </div>
-            </div>
-
-            {/* Friends Going */}
-            {friendsGoing > 0 && (
-              <div className="flex items-center gap-2 text-sm">
-                <Users className="h-4 w-4 text-primary" />
-                <span className="font-medium text-primary">
-                  {friendsGoing} {friendsGoing === 1 ? 'friend' : 'friends'} going
+            <div className="flex flex-col gap-2 text-sm text-muted-foreground">
+              {/* Fecha */}
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-primary" />
+                <span className="capitalize">
+                    {/* Convertir el string ISO a Date */}
+                    {format(new Date(event.startDateTime), 'MMM d, h:mm a', { locale: es })}
                 </span>
               </div>
-            )}
+              
+              {/* Ubicación */}
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-primary" />
+                <span className="line-clamp-1">{event.location}</span>
+              </div>
+
+              {/* Asistentes */}
+              {event.attendeesCount > 0 && (
+                <div className="flex items-center gap-2 mt-1">
+                  <Users className="h-4 w-4 text-primary" />
+                  <span className="text-xs font-medium">
+                    {event.attendeesCount} asistentes
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
         </Card>
       </Link>

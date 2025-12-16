@@ -104,5 +104,15 @@ export const EventService = {
         throw new Error("No se pudo enviar el mensaje");
     }
     return response.json();
-  }
+  },
+
+  // Buscar eventos
+  searchEvents: async (query: string): Promise<EventDto[]> => {
+    if (!query) return [];
+    const response = await fetch(`${API_URL}/events/search?query=${encodeURIComponent(query)}`, {
+        headers: getAuthHeaders(),
+    });
+    if (!response.ok) return [];
+    return response.json();
+},
 };

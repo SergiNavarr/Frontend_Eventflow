@@ -86,4 +86,13 @@ export const CommunityService = {
     return response.json();
   },
 
+  // Buscar comunidades por nombre
+  searchCommunities: async (query: string): Promise<CommunityDto[]> => {
+    if (!query) return [];
+    const response = await fetch(`${API_URL}/communities/search?query=${encodeURIComponent(query)}`, {
+        headers: getAuthHeaders(),
+    });
+    if (!response.ok) return [];
+    return response.json();
+},
 };
