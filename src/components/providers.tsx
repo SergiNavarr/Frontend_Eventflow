@@ -12,7 +12,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Es recomendable ponerlo dentro del QueryClient por si a futuro usas React Query dentro del Auth */}
       <AuthProvider>
         <TooltipProvider>
           {children}

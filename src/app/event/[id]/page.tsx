@@ -11,11 +11,9 @@ import { EventDto, UserProfileDto } from "@/types";
 import { Sidebar } from "@/components/Sidebar";
 import { BottomNav } from "@/components/BottomNav";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
-// Importamos los sub-componentes
-import { EventHeader } from "@/components/EventHeader"; // Ajusta la ruta según donde los guardes
-import { EventInfo } from "@/components/EventInfo"; 
+import { EventHeader } from "@/components/EventHeader";
+import { EventInfo } from "@/components/EventInfo";
 import { EventChat } from "@/components/EventChat";
 
 export default function EventDetailPage() {
@@ -84,25 +82,28 @@ export default function EventDetailPage() {
                   transition={{ duration: 0.2 }}
                 >
                   <TabsContent value="info" className="mt-0">
-                    <EventInfo 
-                        event={event} 
-                        attendees={attendees} 
-                        onJoinChange={loadEventData} // Recargamos al cambiar estado
+                    <EventInfo
+                      event={event}
+                      attendees={attendees}
+                      onJoinChange={loadEventData}
                     />
                   </TabsContent>
 
                   <TabsContent value="chat" className="mt-0">
-                    <EventChat eventId={event.id} />
+                    <EventChat
+                      eventId={event.id}
+                      isParticipant={Boolean(event.myRsvpStatus)}
+                    />
                   </TabsContent>
 
                   <TabsContent value="tasks" className="mt-0">
-                     <div className="p-8 text-center text-muted-foreground border border-dashed rounded-lg">
+                    <div className="p-8 text-center text-muted-foreground border border-dashed rounded-lg">
                       Próximamente: Gestión de Tareas
                     </div>
                   </TabsContent>
 
                   <TabsContent value="polls" className="mt-0">
-                     <div className="p-8 text-center text-muted-foreground border border-dashed rounded-lg">
+                    <div className="p-8 text-center text-muted-foreground border border-dashed rounded-lg">
                       Próximamente: Encuestas
                     </div>
                   </TabsContent>
