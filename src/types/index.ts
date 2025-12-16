@@ -10,7 +10,15 @@ export interface UserProfileDto {
   avatarUrl: string | null;
   followersCount: number;
   followingCount: number;
-  createdAt: string; 
+  createdAt: string;
+}
+
+export interface UserSummaryDto {
+  id: number;
+  username: string;
+  avatarUrl?: string; // Puede ser null
+  bio?: string; // Puede ser null
+  isFollowing: boolean;
 }
 
 export interface UserLoginDto {
@@ -34,19 +42,19 @@ export interface PostDto {
   // Propiedades principales
   id: number;
   content: string;
-  imageUrl: string | null;      // C# string?
-  createdAt: string;            // C# DateTime
+  imageUrl: string | null; // C# string?
+  createdAt: string; // C# DateTime
 
   // Datos del Autor
   authorId: number;
   authorName: string;
-  authorAvatar: string | null;  // C# string?
+  authorAvatar: string | null; // C# string?
 
   // Contexto (Propiedades opcionales y/o nulas)
-  communityId: number | null;   // C# int?
+  communityId: number | null; // C# int?
   communityName: string | null; // C# string?
-  eventId: number | null;       // C# int?
-  eventTitle: string | null;    // C# string?
+  eventId: number | null; // C# int?
+  eventTitle: string | null; // C# string?
 
   // Contadores
   likesCount: number;
@@ -58,16 +66,16 @@ export interface PostDto {
 
 // --- DTO para Crear una nueva Publicación ---
 export interface CreatePostDto {
-  content: string;              // Required
-  imageUrl?: string | null;     // C# string?. Aquí lo hacemos opcional en el envío
-  communityId?: number | null;  // C# int?. Aquí lo hacemos opcional
-  eventId?: number | null;      // C# int?. Aquí lo hacemos opcional
+  content: string; // Required
+  imageUrl?: string | null; // C# string?. Aquí lo hacemos opcional en el envío
+  communityId?: number | null; // C# int?. Aquí lo hacemos opcional
+  eventId?: number | null; // C# int?. Aquí lo hacemos opcional
 }
 
 // --- DTO para Actualizar una Publicación ---
 export interface UpdatePostDto {
-  content: string;              // Required
-  imageUrl?: string | null;     // C# string?. Aquí lo hacemos opcional en el envío
+  content: string; // Required
+  imageUrl?: string | null; // C# string?. Aquí lo hacemos opcional en el envío
 }
 
 // --- DTO para la Respuesta del Backend (El Evento Completo) ---
@@ -90,9 +98,9 @@ export interface EventDto {
 
   // Estadísticas y Estado
   attendeesCount: number;
-  
+
   // Backend devuelve "Going" si asistes, o null si no.
-  myRsvpStatus?: string | null; 
+  myRsvpStatus?: string | null;
 }
 
 // DTO para el Chat del Evento
@@ -110,25 +118,25 @@ export interface EventChatMessageDto {
 export interface CreateEventDto {
   title: string;
   description: string;
-  startDateTime: string;          // Usar string ISO 8601 al enviar
-  endDateTime?: string | null;    // Opcional en el envío, usar string ISO 8601 o null
+  startDateTime: string; // Usar string ISO 8601 al enviar
+  endDateTime?: string | null; // Opcional en el envío, usar string ISO 8601 o null
   location: string;
-  isOnline?: boolean;             // Opcional en el envío (tiene default = false)
-  coverImageUrl?: string | null;  // Opcional
-  maxAttendees?: number | null;   // Opcional
-  communityId?: number | null;    // Opcional
+  isOnline?: boolean; // Opcional en el envío (tiene default = false)
+  coverImageUrl?: string | null; // Opcional
+  maxAttendees?: number | null; // Opcional
+  communityId?: number | null; // Opcional
 }
 
 // --- DTO para Actualizar un Evento existente ---
 export interface UpdateEventDto {
   title: string;
   description: string;
-  startDateTime: string;          // Usar string ISO 8601 al enviar
-  endDateTime?: string | null;    // Opcional en el envío
+  startDateTime: string; // Usar string ISO 8601 al enviar
+  endDateTime?: string | null; // Opcional en el envío
   location: string;
-  isOnline?: boolean;             // Opcional en el envío
-  coverImageUrl?: string | null;  // Opcional
-  maxAttendees?: number | null;   // Opcional
+  isOnline?: boolean; // Opcional en el envío
+  coverImageUrl?: string | null; // Opcional
+  maxAttendees?: number | null; // Opcional
 }
 
 // --- DTO para la Respuesta del Backend (La Comunidad Completa) ---
@@ -144,12 +152,12 @@ export interface CommunityDto {
 
   // Información del Dueño
   ownerId: number;
-  ownerName: string; 
+  ownerName: string;
 
-  createdAt: string;            // C# DateTime
+  createdAt: string; // C# DateTime
 
   // Estado del usuario actual
-  isMember: boolean;            // ¿El usuario actual es miembro?
+  isMember: boolean; // ¿El usuario actual es miembro?
 }
 
 // --- DTO para Crear una nueva Comunidad ---
@@ -170,24 +178,24 @@ export interface UpdateCommunityDto {
 export interface CommentDto {
   id: number;
   content: string;
-  createdAt: string;            // C# DateTime
+  createdAt: string; // C# DateTime
 
   // Datos del Autor
   authorId: number;
   authorName: string;
-  authorAvatar: string | null;  // C# string?
+  authorAvatar: string | null; // C# string?
 }
 
 // --- DTO para Crear un nuevo Comentario ---
 export interface CreateCommentDto {
-  content: string;              // Required
+  content: string; // Required
 }
 
 // Basado en AuthResponseDto.cs
 // Este es CRUCIAL para tu login
 export interface AuthResponse {
   token: string;
-  userId: number;   // Coincide con public int UserId
+  userId: number; // Coincide con public int UserId
   username: string; // Coincide con public string Username
-  email: string;    // Coincide con public string Email
+  email: string; // Coincide con public string Email
 }
