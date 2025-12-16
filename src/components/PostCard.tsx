@@ -114,14 +114,41 @@ export const PostCard = ({ post, delay = 0 }: PostCardProps) => {
         </CardHeader>
 
         <CardContent className="space-y-3 pb-3">
-          {/* Referencia a Evento (Si el post habla de un evento) */}
+          {/* Referencia a Evento */}
           {post.eventId && post.eventTitle && (
             <div className="mb-2 rounded-md bg-primary/5 border border-primary/10 p-2 flex items-center gap-2 text-sm text-primary">
-              <Calendar className="h-4 w-4" />
-              <span className="font-medium">Relacionado al evento: </span>
-              <span className="underline cursor-pointer hover:text-primary/80">
-                {post.eventTitle}
-              </span>
+              <Link href={`/event/${post.eventId}`}>
+                <Badge
+                  variant="secondary"
+                  className="cursor-pointer hover:bg-secondary/80 transition-colors gap-1 pl-2 pr-3 py-1 text-foreground"
+                >
+                  <Calendar className="h-3 w-3" />
+
+                  {/* Texto normal */}
+                  <span className="font-normal ml-1">Evento:</span>
+
+                  {/* Nombre del evento en negrita */}
+                  <span className="font-bold ml-1">{post.eventTitle}</span>
+                </Badge>
+              </Link>
+            </div>
+          )}
+
+          {post.communityId && post.communityName && (
+            <div className="mb-3">
+              <Link href={`/communities/${post.communityId}`}>
+                <Badge
+                  variant="secondary"
+                  className="cursor-pointer hover:bg-secondary/80 transition-colors gap-1 pl-2 pr-3 py-1 text-foreground"
+                >
+                  {/* Icono de Usuarios para representar Comunidad */}
+                  <Users className="h-3 w-3" />
+
+                  <span className="font-normal ml-1">Comunidad:</span>
+
+                  <span className="font-bold ml-1">{post.communityName}</span>
+                </Badge>
+              </Link>
             </div>
           )}
 
