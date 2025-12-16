@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Heart, MessageCircle, Share2, MoreHorizontal, Calendar, Users } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale'; // Asegúrate de tener date-fns instalado
+import { es } from 'date-fns/locale';
 import { PostDto } from '@/types';
 import { PostService } from '@/services/post.service';
 
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
+import { CommentsDialog } from './CommentsDialog';
 
 interface PostCardProps {
   post: PostDto;
@@ -26,6 +27,7 @@ export const PostCard = ({ post, delay = 0 }: PostCardProps) => {
   const [isLiked, setIsLiked] = useState(post.isLikedByMe);
   const [likesCount, setLikesCount] = useState(post.likesCount);
   const [isLikeLoading, setIsLikeLoading] = useState(false);
+  const [commentsCount, setCommentsCount] = useState(post.commentsCount);
 
   // Formateo de fecha (Ej: "hace 5 minutos")
   const timeAgo = formatDistanceToNow(new Date(post.createdAt), { 
@@ -146,10 +148,16 @@ export const PostCard = ({ post, delay = 0 }: PostCardProps) => {
             </Button>
 
             {/* Botón de Comentarios */}
-            <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground hover:text-primary">
-              <MessageCircle className="h-4 w-4" />
-              <span className="text-xs">{post.commentsCount}</span>
-            </Button>
+            <CommentsDialog
+              postId={post.id}
+              initialCommentsCount={commentsCount}
+              onCommentAdded={() => setCommentsCount((prev) => prev + 1)}
+            >
+              <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground hover:text-primary">
+                <MessageCircle className="h-4 w-4" />
+                <span className="text-xs">{commentsCount}</span>
+              </Button>
+            </CommentsDialog>
 
             {/* Botón de Compartir */}
             <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground hover:text-primary">
