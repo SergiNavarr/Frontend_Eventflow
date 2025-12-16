@@ -30,29 +30,42 @@ export const ProfileHeader = ({
   onProfileUpdate,
 }: ProfileHeaderProps) => {
   const [isFollowing, setIsFollowing] = useState(profile.isFollowing || false);
+  const [followersCount, setFollowersCount] = useState(profile.followersCount);
 
   useEffect(() => {
     setIsFollowing(profile.isFollowing || false);
+    setFollowersCount(profile.followersCount);
   }, [profile]);
 
   // Función placeholder para seguir/dejar de seguir
-  const handleFollowToggle = () => {
-    setIsFollowing(!isFollowing);
-    if (!isFollowing) {
-      UserService.followUser(profile.id);
-    } else {
-      UserService.unfollowUser(profile.id);
+  const handleFollowToggle = async () => {
+    // Guardamos el estado anterior por si falla la API
+    const wasFollowing = isFollowing;
+
+    setIsFollowing(!wasFollowing);
+    
+    setFollowersCount((prev) => (wasFollowing ? prev - 1 : prev + 1));
+
+    try {
+      if (!wasFollowing) {
+        await UserService.followUser(profile.id);
+      } else {
+        await UserService.unfollowUser(profile.id);
+      }
+      onProfileUpdate(); 
+    } catch (error) {
+      console.error("Error al seguir/dejar de seguir", error);
+      // Revertir cambios en caso de error
+      setIsFollowing(wasFollowing);
+      setFollowersCount((prev) => (wasFollowing ? prev + 1 : prev - 1));
     }
   };
 
   return (
     <div className="relative mb-6">
-      {/* 1. Portada (Banner) - Placeholder o imagen real si tuvieras */}
       <div className="h-32 w-full overflow-hidden rounded-t-xl bg-gradient-to-r from-primary/20 to-primary/5 md:h-48">
-        {/* Si tuvieras coverUrl en el DTO, iría aquí */}
       </div>
 
-      {/* 2. Contenido del Perfil */}
       <div className="px-4 pb-4">
         <div className="relative flex flex-col items-start">
           {/* Avatar superpuesto al banner */}
@@ -75,7 +88,6 @@ export const ProfileHeader = ({
               <h1 className="text-2xl font-bold text-foreground">
                 {profile.username}
               </h1>
-              {/* Si tuvieras nombre real separado del username, iría aquí */}
               <p className="text-muted-foreground">@{profile.username}</p>
             </div>
 
