@@ -32,24 +32,24 @@ export default function ProfilePage() {
   // El ID viene como string desde la URL, lo convertimos a número
   // Nota: params.id puede ser undefined en primer render, por eso el chequeo
   const profileId = params.id ? Number(params.id) : null;
-  
+
   // Determinamos si es MI perfil
   // (Si el ID de la URL coincide con el ID del usuario logueado)
   const isOwnProfile = currentUser?.id === profileId;
 
   useEffect(() => {
     if (profileId) {
-      fetchProfileData(profileId);
+      fetchProfileData(profileId, true);
     }
   }, [profileId]);
 
-  const fetchProfileData = async (id: number) => {
-    setLoading(true);
+  const fetchProfileData = async (id: number, showLoading = true) => {
+    if (showLoading) setLoading(true);
     try {
       // Cargamos Perfil y Posts en paralelo para mayor velocidad
       const [userProfile, userPosts] = await Promise.all([
-        UserService.getProfile(id),       // Llama a /api/users/{id}
-        PostService.getPosts({ userId: id }) // Asumimos que implementamos filtro por userId
+        UserService.getProfile(id), // Llama a /api/users/{id}
+        PostService.getPostsByUser(id), // Asumimos que implementamos filtro por userId
       ]);
 
       setProfile(userProfile);
@@ -62,7 +62,14 @@ export default function ProfilePage() {
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
+    }
+  };
+
+  const handleProfileUpdate = () => {
+    if (profileId) {
+      // false = No actives el loading (para que no se cierre el modal)
+      fetchProfileData(profileId, false);
     }
   };
 
@@ -85,45 +92,45 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-background">
       <Sidebar />
-      
+
       <main className="min-h-screen pb-24 md:ml-72 md:pb-8">
         <ScrollArea className="h-full">
           <div className="mx-auto max-w-3xl">
-            
             {/* Header del Perfil */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
             >
-              <ProfileHeader profile={profile} isOwnProfile={isOwnProfile} />
+              <ProfileHeader
+                profile={profile}
+                isOwnProfile={isOwnProfile}
+                onProfileUpdate={handleProfileUpdate}
+              />
             </motion.div>
 
             {/* Lista de Publicaciones del Usuario */}
             <div className="px-4 pb-10">
-              <h2 className="mb-4 text-lg font-semibold text-foreground">Publicaciones</h2>
-              
+              <h2 className="mb-4 text-lg font-semibold text-foreground">
+                Publicaciones
+              </h2>
+
               <div className="space-y-6">
                 {posts.length > 0 ? (
                   posts.map((post, index) => (
-                    <PostCard 
-                      key={post.id} 
-                      post={post} 
-                      delay={index * 0.1} 
-                    />
+                    <PostCard key={post.id} post={post} delay={index * 0.1} />
                   ))
                 ) : (
                   <div className="rounded-xl border border-dashed border-border/60 p-8 text-center">
                     <p className="text-muted-foreground">
-                      {isOwnProfile 
-                        ? "Aún no has publicado nada." 
+                      {isOwnProfile
+                        ? "Aún no has publicado nada."
                         : `@${profile.username} aún no ha publicado nada.`}
                     </p>
                   </div>
                 )}
               </div>
             </div>
-
           </div>
         </ScrollArea>
         <BottomNav />
