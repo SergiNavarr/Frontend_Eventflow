@@ -40,7 +40,11 @@ export const Sidebar = () => {
       <div className="flex h-20 items-center px-6">
         <Link href="/" className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <span className="text-lg font-bold">E</span>
+            <img
+              src="/logo.png"
+              alt="Logo"
+              className="h-5 w-5 object-contain"
+            />
           </div>
           <span className="text-xl font-bold tracking-tight">EventFlow</span>
         </Link>
