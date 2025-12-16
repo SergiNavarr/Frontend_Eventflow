@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/components/ui/use-toast";
+import Link from "next/link";
 
 // Imports de Servicios y Tipos
 import { UserService } from "@/services/user.service";
@@ -100,7 +101,11 @@ export function FollowersDialog({
               {loading ? (
                 <LoadingState />
               ) : (
-                <UserList users={users} onUpdate={onUpdate} />
+                <UserList
+                  users={users}
+                  onUpdate={onUpdate}
+                  onClose={handleClose}
+                />
               )}
             </TabsContent>
             <TabsContent
@@ -110,7 +115,11 @@ export function FollowersDialog({
               {loading ? (
                 <LoadingState />
               ) : (
-                <UserList users={users} onUpdate={onUpdate} />
+                <UserList
+                  users={users}
+                  onUpdate={onUpdate}
+                  onClose={handleClose}
+                />
               )}
             </TabsContent>
           </ScrollArea>
@@ -132,9 +141,11 @@ const LoadingState = () => (
 const UserList = ({
   users,
   onUpdate,
+  onClose,
 }: {
   users: UserSummaryDto[];
   onUpdate?: () => void;
+  onClose: () => void;
 }) => {
   if (users.length === 0) {
     return (
@@ -146,7 +157,12 @@ const UserList = ({
   return (
     <div className="space-y-4">
       {users.map((user) => (
-        <UserRow key={user.id} user={user} onUpdate={onUpdate} />
+        <UserRow
+          key={user.id}
+          user={user}
+          onUpdate={onUpdate}
+          onClose={onClose}
+        />
       ))}
     </div>
   );
@@ -156,9 +172,11 @@ const UserList = ({
 const UserRow = ({
   user,
   onUpdate,
+  onClose,
 }: {
   user: UserSummaryDto;
   onUpdate?: () => void;
+  onClose: () => void;
 }) => {
   const { toast } = useToast();
   const { user: currentUser } = useAuth();
@@ -173,7 +191,7 @@ const UserRow = ({
 
     setIsLoading(true);
     const previousState = isFollowing;
-    setIsFollowing(!isFollowing); 
+    setIsFollowing(!isFollowing);
 
     try {
       if (previousState) {
@@ -206,26 +224,34 @@ const UserRow = ({
   };
 
   return (
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-3">
+    <div className="flex items-center justify-between group">
+      {/* USAMOS LINK PARA REDIRIGIR 
+         - onClick={onClose} asegura que el modal se cierre
+         - flex-1 toma el espacio disponible
+         - min-w-0 permite que el truncate funcione
+      */}
+      <Link
+        href={`/profile/${user.id}`}
+        onClick={onClose}
+        className="flex items-center gap-3 flex-1 hover:opacity-70 transition-opacity min-w-0 cursor-pointer"
+      >
         <Avatar>
           <AvatarImage src={user.avatarUrl || undefined} />
           <AvatarFallback>
             {user.username.substring(0, 2).toUpperCase()}
           </AvatarFallback>
         </Avatar>
-        <div className="flex flex-col">
-          <span className="text-sm font-medium leading-none">
+        <div className="flex flex-col overflow-hidden">
+          <span className="text-sm font-medium leading-none truncate group-hover:underline">
             {user.username}
           </span>
-          {/* Como UserSummaryDto NO tiene fullName, mostramos el bio recortado o nada */}
           {user.bio && (
-            <span className="text-xs text-muted-foreground line-clamp-1">
+            <span className="text-xs text-muted-foreground truncate">
               {user.bio}
             </span>
           )}
         </div>
-      </div>
+      </Link>
 
       {currentUser && !isMe && (
         <Button

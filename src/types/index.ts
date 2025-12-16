@@ -11,6 +11,7 @@ export interface UserProfileDto {
   followersCount: number;
   followingCount: number;
   createdAt: string;
+  isFollowing: boolean;
 }
 
 export interface UserSummaryDto {

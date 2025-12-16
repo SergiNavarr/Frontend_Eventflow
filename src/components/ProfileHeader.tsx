@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { UserService } from "@/services/user.service";
 import { FollowersDialog } from "@/components/FollowersDialog";
 
@@ -29,7 +29,11 @@ export const ProfileHeader = ({
   isOwnProfile,
   onProfileUpdate,
 }: ProfileHeaderProps) => {
-  const [isFollowing, setIsFollowing] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(profile.isFollowing || false);
+
+  useEffect(() => {
+    setIsFollowing(profile.isFollowing || false);
+  }, [profile]);
 
   // Función placeholder para seguir/dejar de seguir
   const handleFollowToggle = () => {
