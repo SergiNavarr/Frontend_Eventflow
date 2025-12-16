@@ -11,7 +11,7 @@ import {
   LogOut,
   LogIn,
   PlusCircle,
-  Settings
+  Settings,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils"; // Asegúrate de tener esta utilidad (típica de shadcn/ui)
@@ -35,7 +35,6 @@ export const Sidebar = () => {
 
   return (
     <aside className="fixed left-0 top-0 z-40 hidden h-screen w-72 border-r border-border/40 bg-background/95 backdrop-blur-xl md:flex md:flex-col">
-
       {/* 1. Logo */}
       <div className="flex h-20 items-center px-6">
         <Link href="/" className="flex items-center gap-2">
@@ -51,7 +50,6 @@ export const Sidebar = () => {
       </div>
 
       <div className="flex-1 flex flex-col justify-between px-4 pb-6">
-
         {/* 2. Navegación Principal */}
         <nav className="space-y-2">
           {menuItems.map((item) => {
@@ -76,7 +74,9 @@ export const Sidebar = () => {
           {isAuthenticated && (
             <Link href={`/profile/${user?.id}`}>
               <Button
-                variant={pathname.startsWith('/profile') ? "secondary" : "ghost"}
+                variant={
+                  pathname === `/profile/${user?.id}` ? "secondary" : "ghost"
+                }
                 className="w-full justify-start gap-3 text-base font-normal"
               >
                 <User className="h-5 w-5" />
@@ -88,7 +88,6 @@ export const Sidebar = () => {
 
         {/* 3. Área de Usuario (Footer del Sidebar) */}
         <div className="space-y-4">
-
           <Separator className="bg-border/50" />
 
           {isLoading ? (
@@ -144,11 +143,10 @@ export const Sidebar = () => {
           ) : (
             // --- ESTADO: NO LOGUEADO ---
             <div className="flex flex-col gap-3 rounded-lg border border-border/50 bg-card p-4">
-              <div className="text-sm font-medium">
-                Únete a EventFlow
-              </div>
+              <div className="text-sm font-medium">Únete a EventFlow</div>
               <p className="text-xs text-muted-foreground">
-                Inicia sesión para interactuar, crear eventos y seguir comunidades.
+                Inicia sesión para interactuar, crear eventos y seguir
+                comunidades.
               </p>
               <div className="grid gap-2">
                 <Link href="/login" className="w-full">
