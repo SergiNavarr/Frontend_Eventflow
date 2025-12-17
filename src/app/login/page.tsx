@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useAuth } from '@/context/AuthContext'; // Importar el hook
+import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardContent, CardFooter, CardTitle, CardDescription } from '@/components/ui/card';
@@ -19,9 +19,7 @@ export default function LoginPage() {
     setIsSubmitting(true);
     try {
       await login({ email, password });
-      // La redirección la maneja el AuthContext
     } catch (error) {
-      // El error se muestra en el toast del AuthContext
     } finally {
       setIsSubmitting(false);
     }

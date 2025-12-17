@@ -29,9 +29,7 @@ export default function RegisterPage() {
     setIsSubmitting(true);
     try {
       await register(formData);
-      // La redirección la maneja el AuthContext
     } catch (error) {
-       // Error manejado por el toast del contexto
     } finally {
       setIsSubmitting(false);
     }

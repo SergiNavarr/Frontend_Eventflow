@@ -144,7 +144,7 @@ export default function EventsPage() {
                       <div className="flex-1 space-y-2">
                         {dayEvents.length > 0 ? (
                           dayEvents.map(evt => {
-                            // DISTINCIÓN VISUAL
+
                             const isAttending = !!evt.myRsvpStatus; 
 
                             return (

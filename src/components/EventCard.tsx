@@ -54,7 +54,6 @@ export const EventCard = ({ event, delay = 0 }: EventCardProps) => {
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-primary" />
                 <span className="capitalize">
-                    {/* Convertir el string ISO a Date */}
                     {format(new Date(event.startDateTime), 'MMM d, h:mm a', { locale: es })}
                 </span>
               </div>

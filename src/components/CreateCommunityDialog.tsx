@@ -64,10 +64,9 @@ export function CreateCommunityDialog() {
         description: `Has creado "${newCommunity.name}" exitosamente.`,
       });
 
-      setOpen(false); // Cerramos modal
-      setFormData({ name: "", description: "", coverImageUrl: "" }); // Limpiamos
+      setOpen(false); 
+      setFormData({ name: "", description: "", coverImageUrl: "" });
 
-      // 3. Redirigir a la página de la nueva comunidad
       router.push(`/communities/${newCommunity.id}`);
 
     } catch (error: any) {

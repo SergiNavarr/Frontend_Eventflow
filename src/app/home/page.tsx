@@ -12,36 +12,31 @@ import { BottomNav } from '@/components/BottomNav';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/components/ui/use-toast';
 
-// Servicios y Tipos
-import { PostService } from '@/services/post.service'; // Importamos solo PostService
-import { PostDto } from '@/types'; // Importamos el DTO real
+import { PostService } from '@/services/post.service';
+import { PostDto } from '@/types';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 
 const Home = () => {
-  // Ahora el estado es estrictamente un array de PostDto
   const [posts, setPosts] = useState<PostDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [greeting, setGreeting] = useState('');
-  const [page, setPage] = useState(1);         // Página actual a pedir
-  const [hasMore, setHasMore] = useState(true); // ¿Quedan posts por cargar?
-  const [loadingMore, setLoadingMore] = useState(false); // Spinner pequeño inferior
+  const [page, setPage] = useState(1); 
+  const [hasMore, setHasMore] = useState(true); 
+  const [loadingMore, setLoadingMore] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    // 1. Establecer saludo
     const hour = new Date().getHours();
     if (hour < 12) setGreeting('Buenos Días');
     else if (hour < 18) setGreeting('Buenas Tardes');
     else setGreeting('Buenas Noches');
 
-    // 2. Cargar posts
     fetchPosts();
   }, []);
 
   const fetchPosts = async () => {
-    setLoading(true); // Spinner grande de carga inicial
+    setLoading(true);
     try {
-      // 1. Siempre pedimos la página 1 al iniciar/refrescar
       const PAGE_SIZE = 2;
       const data = await PostService.getFeedPosts(1, PAGE_SIZE);
 
@@ -67,7 +62,6 @@ const Home = () => {
   };
 
   const handleLoadMore = async () => {
-    // Evitamos llamadas dobles o si ya no hay más datos
     if (loadingMore || !hasMore) return;
 
     setLoadingMore(true);
@@ -124,7 +118,6 @@ const Home = () => {
 
             {/* Widget para crear Post */}
             <div className="mb-6">
-              {/* Al crear un post, fetchPosts recarga la página 1 y resetea la lista */}
               <CreatePostWidget onPostCreated={fetchPosts} />
             </div>
 
@@ -135,7 +128,6 @@ const Home = () => {
                   animate={{ rotate: 360 }}
                   transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                 >
-                  {/* Asegúrate de tener importado Sparkles o Loader2 */}
                   <Sparkles className="h-12 w-12 text-primary" />
                 </motion.div>
               </div>
@@ -146,14 +138,13 @@ const Home = () => {
                   <>
                     {posts.map((post, index) => (
                       <PostCard
-                        key={`post-${post.id}`} // Usar ID único es mejor que index
+                        key={`post-${post.id}`}
                         post={post}
-                        delay={index * 0.05} // Pequeño ajuste para que no sea tan lento si hay muchos
+                        delay={index * 0.05}
                       />
                     ))}
 
-                    {/* --- DETECTOR DE SCROLL INFINITO --- */}
-                    {/* Solo se renderiza si el backend dice que hay más páginas */}
+                    {/*DETECTOR DE SCROLL INFINITO*/}
                     {hasMore && (
                       <div
                         ref={loadMoreRef}
@@ -174,7 +165,7 @@ const Home = () => {
                     )}
                   </>
                 ) : (
-                  // Estado Vacío (Solo si no hay posts y no está cargando)
+                  // Estado Vacío
                   <div className="text-center py-10 text-muted-foreground">
                     No hay publicaciones aún. ¡Sé el primero en escribir algo!
                   </div>

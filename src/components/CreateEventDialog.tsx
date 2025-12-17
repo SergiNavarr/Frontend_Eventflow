@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CalendarPlus, Loader2, MapPin, Globe, Image as ImageIcon } from "lucide-react";
-import { formatISO } from "date-fns";
 
 import { EventService } from "@/services/event.service";
 import { CreateEventDto } from "@/types";

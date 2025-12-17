@@ -29,12 +29,9 @@ export default function CommunityDetailPage() {
   const rawId = params?.id;
   const communityId = rawId ? Number(Array.isArray(rawId) ? rawId[0] : rawId) : null;
 
-  // Usamos useCallback para poder pasar esta función al hijo sin problemas de re-render
   const fetchData = useCallback(async () => {
     if (!communityId) return;
 
-    // No ponemos setLoading(true) aquí para evitar parpadeos bruscos al recargar tras unirse
-    // Solo la primera vez si loading es true
 
     try {
       const [communityData, communityPosts] = await Promise.all([
@@ -82,14 +79,12 @@ export default function CommunityDetailPage() {
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
               <CommunityHeader
                 community={community}
-                onJoinChange={fetchData} // Al cambiar estado, recarga TODO (incluyendo isMember del padre)
+                onJoinChange={fetchData}
               />
             </motion.div>
 
             <div className="px-4 pb-10">
 
-              {/* Lógica del Widget: */}
-              {/* Si community.isMember es true (que viene del backend), se muestra */}
               {community.isMember && (
                 <div className="mb-8">
                   <CreatePostWidget
@@ -101,7 +96,7 @@ export default function CommunityDetailPage() {
               {community.isMember && (
                 <div className="mb-6 flex justify-between items-center">
                   <h2 className="text-xl font-bold">Actividad</h2>
-                  {/* Pasamos el ID de la comunidad para que el evento se vincule automáticamente */}
+
                   <CreateEventDialog communityId={community.id} />
                 </div>
               )}

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Plus, Users, Loader2 } from "lucide-react";
+import { Search, Users, Loader2 } from "lucide-react";
 
 import { CommunityService } from "@/services/community.service";
 import { CommunityDto } from "@/types";
@@ -10,7 +10,6 @@ import { Sidebar } from "@/components/Sidebar";
 import { BottomNav } from "@/components/BottomNav";
 import { CommunityCard } from "@/components/CommunityCard"; 
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/context/AuthContext";
@@ -29,7 +28,6 @@ export default function CommunitiesPage() {
     fetchCommunities();
   }, []);
 
-  // Efecto para filtrar cuando cambia el texto o la lista original
   useEffect(() => {
     const results = communities.filter(c =>
       c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -41,8 +39,7 @@ export default function CommunitiesPage() {
   const fetchCommunities = async () => {
     try {
       setLoading(true);
-      // Asumimos que GetAllCommunitiesAsync maneja internamente el ID del usuario
-      // gracias a como configuramos el endpoint y el servicio.
+
       const data = await CommunityService.getAllCommunities();
       setCommunities(data);
     } catch (error) {
@@ -75,7 +72,7 @@ export default function CommunitiesPage() {
                 </p>
               </div>
 
-              {/* Botón Crear (Solo si logueado) */}
+              {/* Botón Crear*/}
               {isAuthenticated && (
                 <CreateCommunityDialog />
               )}

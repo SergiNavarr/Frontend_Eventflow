@@ -1,17 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation"; // Hook para leer la URL
+import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 
-// Servicios y Contextos
 import { UserService } from "@/services/user.service";
 import { PostService } from "@/services/post.service";
 import { UserProfileDto, PostDto } from "@/types";
 import { useAuth } from "@/context/AuthContext";
 
-// Componentes
 import { Sidebar } from "@/components/Sidebar";
 import { BottomNav } from "@/components/BottomNav";
 import { PostCard } from "@/components/PostCard";
@@ -21,20 +19,15 @@ import { useToast } from "@/components/ui/use-toast";
 
 export default function ProfilePage() {
   const params = useParams();
-  const { user: currentUser } = useAuth(); // El usuario logueado actualmente
+  const { user: currentUser } = useAuth();
   const { toast } = useToast();
 
-  // Estados locales
   const [profile, setProfile] = useState<UserProfileDto | null>(null);
   const [posts, setPosts] = useState<PostDto[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // El ID viene como string desde la URL, lo convertimos a número
-  // Nota: params.id puede ser undefined en primer render, por eso el chequeo
   const profileId = params.id ? Number(params.id) : null;
 
-  // Determinamos si es MI perfil
-  // (Si el ID de la URL coincide con el ID del usuario logueado)
   const isOwnProfile = currentUser?.id === profileId;
 
   useEffect(() => {
@@ -46,10 +39,9 @@ export default function ProfilePage() {
   const fetchProfileData = async (id: number, showLoading = true) => {
     if (showLoading) setLoading(true);
     try {
-      // Cargamos Perfil y Posts en paralelo para mayor velocidad
       const [userProfile, userPosts] = await Promise.all([
-        UserService.getProfile(id), // Llama a /api/users/{id}
-        PostService.getPostsByUser(id), // Asumimos que implementamos filtro por userId
+        UserService.getProfile(id),
+        PostService.getPostsByUser(id),
       ]);
 
       setProfile(userProfile);
@@ -68,7 +60,6 @@ export default function ProfilePage() {
 
   const handleProfileUpdate = () => {
     if (profileId) {
-      // false = No actives el loading (para que no se cierre el modal)
       fetchProfileData(profileId, false);
     }
   };

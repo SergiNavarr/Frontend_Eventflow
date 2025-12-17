@@ -7,7 +7,7 @@ import { EventDto, UserProfileDto } from "@/types";
 import { EventService } from "@/services/event.service";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge"; // Asegúrate de tener este componente UI
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 
 interface EventInfoProps {
@@ -67,7 +67,7 @@ export const EventInfo = ({ event, attendees, onJoinChange }: EventInfoProps) =>
         </p>
       </Card>
 
-      {/* 2. Contador de Asistentes Mejorado */}
+      {/* Contador de Asistentes Mejorado */}
       <Card className="border-border/50 bg-card/50 p-6 backdrop-blur-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -105,17 +105,16 @@ export const EventInfo = ({ event, attendees, onJoinChange }: EventInfoProps) =>
         </div>
       </Card>
 
-      {/* 3. Botón con Lógica de Bloqueo */}
+      {/*Botón con Lógica de Bloqueo */}
       <Button
         className={`w-full py-6 text-lg font-bold shadow-lg transition-all ${
           isJoined
-            ? "bg-secondary hover:bg-secondary/90 text-secondary-foreground" // Botón "Salir"
+            ? "bg-secondary hover:bg-secondary/90 text-secondary-foreground"
             : isFull 
-              ? "bg-muted text-muted-foreground cursor-not-allowed" // Botón "Lleno" (Deshabilitado)
-              : "bg-primary hover:bg-primary/90" // Botón "Unirse"
+              ? "bg-muted text-muted-foreground cursor-not-allowed"
+              : "bg-primary hover:bg-primary/90"
         }`}
         onClick={handleJoinToggle}
-        // Deshabilitamos si: está cargando O (está lleno Y NO estoy unido)
         disabled={loading || (isFull && !isJoined)}
       >
         {isJoined ? (

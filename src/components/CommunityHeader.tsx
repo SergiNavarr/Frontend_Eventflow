@@ -4,9 +4,9 @@ import { useState, useEffect } from "react";
 import { CommunityDto } from "@/types";
 import { CommunityService } from "@/services/community.service";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback} from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Users, LogIn, LogOut, CheckCircle2 } from "lucide-react";
+import { Users, LogIn, LogOut} from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 interface CommunityHeaderProps {
@@ -25,7 +25,6 @@ export const CommunityHeader = ({ community, onJoinChange }: CommunityHeaderProp
 
   const handleJoinToggle = async () => {
     setLoading(true);
-    // UI Optimista: Cambiamos visualmente antes de que termine el fetch
     const previousState = isMember;
     setIsMember(!isMember); 
 
@@ -40,14 +39,13 @@ export const CommunityHeader = ({ community, onJoinChange }: CommunityHeaderProp
         toast({ title: "¡Bienvenido!", description: `Te has unido exitosamente.` });
       }
       
-      // Avisamos al padre para que recargue la data global (posts, widget, contadores)
+      // Avisamos al padre para que recargue la data global
       if (onJoinChange) {
          // Pequeño timeout para dar tiempo al back a procesar si es muy rápido
          setTimeout(() => onJoinChange(), 100); 
       }
 
     } catch (error) {
-      // Si falla, revertimos el cambio visual
       setIsMember(previousState);
       toast({ 
         title: "Error", 

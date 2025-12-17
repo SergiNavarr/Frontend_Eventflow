@@ -168,7 +168,6 @@ const UserList = ({
   );
 };
 
-// --- AQUÍ LA LÓGICA IMPORTANTE ---
 const UserRow = ({
   user,
   onUpdate,
@@ -207,7 +206,6 @@ const UserRow = ({
     } catch (error) {
       setIsFollowing(previousState);
 
-      // Verificamos si es un error estándar para sacar el mensaje
       const errorMessage =
         error instanceof Error
           ? error.message
@@ -225,11 +223,6 @@ const UserRow = ({
 
   return (
     <div className="flex items-center justify-between group">
-      {/* USAMOS LINK PARA REDIRIGIR 
-         - onClick={onClose} asegura que el modal se cierre
-         - flex-1 toma el espacio disponible
-         - min-w-0 permite que el truncate funcione
-      */}
       <Link
         href={`/profile/${user.id}`}
         onClick={onClose}

@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { EventChatMessageDto } from '@/types'; // Importamos el tipo nuevo
+import { EventChatMessageDto } from '@/types';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { User } from 'lucide-react';
@@ -44,8 +44,8 @@ export const ChatBubble = ({ message }: ChatBubbleProps) => {
           className={cn(
             'px-4 py-2 rounded-2xl shadow-sm text-sm break-words',
             isCurrentUser 
-              ? 'bg-primary text-primary-foreground rounded-tr-sm' // Mío: Color primario, esquina superior derecha recta
-              : 'bg-card border border-border/50 text-foreground rounded-tl-sm' // Otro: Color tarjeta, esquina superior izquierda recta
+              ? 'bg-primary text-primary-foreground rounded-tr-sm' 
+              : 'bg-card border border-border/50 text-foreground rounded-tl-sm' 
           )}
         >
           <p className="leading-relaxed">{message.content}</p>

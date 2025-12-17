@@ -36,13 +36,11 @@ interface PostCardProps {
 export const PostCard = ({ post, delay = 0 }: PostCardProps) => {
   const { toast } = useToast();
 
-  // Estado local para UI optimista (actualizamos visualmente antes de que responda la API)
   const [isLiked, setIsLiked] = useState(post.isLikedByMe);
   const [likesCount, setLikesCount] = useState(post.likesCount);
   const [isLikeLoading, setIsLikeLoading] = useState(false);
   const [commentsCount, setCommentsCount] = useState(post.commentsCount);
 
-  // Formateo de fecha (Ej: "hace 5 minutos")
   const timeAgo = formatDistanceToNow(new Date(post.createdAt), {
     addSuffix: true,
     locale: es,
@@ -51,7 +49,6 @@ export const PostCard = ({ post, delay = 0 }: PostCardProps) => {
   const handleLike = async () => {
     if (isLikeLoading) return;
 
-    // UI Optimista: Asumimos que funcionará
     const previousLiked = isLiked;
     const previousCount = likesCount;
 

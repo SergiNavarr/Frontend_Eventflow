@@ -5,7 +5,7 @@ import { Search, Loader2 } from "lucide-react";
 import { Sidebar } from "@/components/Sidebar";
 import { BottomNav } from "@/components/BottomNav";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 import { UserService } from "@/services/user.service";
@@ -41,10 +41,10 @@ export default function ExplorePage() {
         setEvents([]);
         setCommunities([]);
       }
-    }, 500); // 500ms de espera
+    }, 500);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [query, activeTab]); // Se ejecuta al cambiar texto o pestaña
+  }, [query, activeTab]);
 
   const performSearch = async () => {
     setLoading(true);
@@ -109,13 +109,11 @@ export default function ExplorePage() {
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
             ) : !query ? (
-              // ESTADO VACÍO (Placeholder)
               <div className="text-center py-20 text-muted-foreground">
                 <Search className="h-12 w-12 mx-auto mb-4 opacity-20" />
                 <p>Escribe algo para comenzar a explorar.</p>
               </div>
             ) : (
-              // RESULTADOS
               <>
                 {/* 1. RESULTADOS DE EVENTOS */}
                 {activeTab === "events" && (

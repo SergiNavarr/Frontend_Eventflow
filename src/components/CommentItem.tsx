@@ -9,11 +9,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface CommentItemProps {
   comment: CommentDto;
-  delay?: number; // animacion de cada comentario con delay escalonado
+  delay?: number;
 }
 
 export const CommentItem = ({ comment, delay = 0 }: CommentItemProps) => {
-  // se calcula tiempo de creacion
   const timeAgo = formatDistanceToNow(new Date(comment.createdAt), {
     addSuffix: true,
     locale: es,

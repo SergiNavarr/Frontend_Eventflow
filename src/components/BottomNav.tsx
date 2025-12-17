@@ -61,7 +61,6 @@ export const BottomNav = () => {
 
         {/* 2. Item de Perfil Dinámico */}
         {isAuthenticated && user ? (
-          // --- USUARIO LOGUEADO: Muestra Avatar ---
           <Link
             href={`/profile/${user.id}`}
             className={cn(
@@ -80,7 +79,6 @@ export const BottomNav = () => {
             <span className="text-[10px] font-medium">Yo</span>
           </Link>
         ) : (
-          // --- USUARIO NO LOGUEADO: Muestra Login ---
           <Link
             href="/login"
             className={cn(
