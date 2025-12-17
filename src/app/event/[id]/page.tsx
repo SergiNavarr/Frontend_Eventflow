@@ -15,6 +15,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EventHeader } from "@/components/EventHeader";
 import { EventInfo } from "@/components/EventInfo";
 import { EventChat } from "@/components/EventChat";
+import { EventPolls } from "@/components/EventPolls";
+import { EventTasks } from "@/components/EventTasks";
 
 export default function EventDetailPage() {
   const params = useParams();
@@ -32,7 +34,6 @@ export default function EventDetailPage() {
   const loadEventData = async () => {
     if (!id) return;
     try {
-      // Cargamos Evento y Asistentes en paralelo
       const [eventData, attendeesData] = await Promise.all([
         EventService.getById(id),
         EventService.getAttendees(id),
@@ -97,15 +98,11 @@ export default function EventDetailPage() {
                   </TabsContent>
 
                   <TabsContent value="tasks" className="mt-0">
-                    <div className="p-8 text-center text-muted-foreground border border-dashed rounded-lg">
-                      Próximamente: Gestión de Tareas
-                    </div>
+                    <EventTasks isParticipant={Boolean(event.myRsvpStatus)}/>
                   </TabsContent>
 
                   <TabsContent value="polls" className="mt-0">
-                    <div className="p-8 text-center text-muted-foreground border border-dashed rounded-lg">
-                      Próximamente: Encuestas
-                    </div>
+                    <EventPolls isParticipant={Boolean(event.myRsvpStatus)}/>
                   </TabsContent>
                 </motion.div>
               </AnimatePresence>

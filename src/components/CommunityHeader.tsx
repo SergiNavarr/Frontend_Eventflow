@@ -87,17 +87,8 @@ export const CommunityHeader = ({
       </div>
 
       {/* 2. Info Principal */}
-      <div className="px-4 pb-4">
+      <div className="px-4 pb-4 pt-4">
         <div className="relative flex flex-col items-start">
-          {/* Icono/Avatar de la comunidad */}
-          <div className="-mt-10 mb-3 md:-mt-14">
-            <Avatar className="h-20 w-20 border-4 border-background bg-background md:h-28 md:w-28 shadow-sm">
-              <AvatarFallback className="text-3xl font-bold bg-primary text-primary-foreground">
-                {community.name.substring(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-          </div>
-
           <div className="flex w-full flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div className="space-y-2">
               <h1 className="text-3xl font-bold tracking-tight text-foreground">
