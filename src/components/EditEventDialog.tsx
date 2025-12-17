@@ -20,7 +20,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 
 import { EventService } from "@/services/event.service";
+import { ImageService } from "@/services/image.service";
 import { EventDto, UpdateEventDto } from "@/types";
+import { ImageUpload } from "./ImageUpload";
 
 interface EditEventDialogProps {
   event: EventDto;
@@ -33,11 +35,11 @@ export function EditEventDialog({
 }: EditEventDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const { toast } = useToast();
 
   const formatForInput = (isoString?: string | null) => {
     if (!isoString) return "";
-    // Creamos objeto Date y lo pasamos a ISO, luego cortamos segundos y zona horaria
     return new Date(isoString).toISOString().slice(0, 16);
   };
 
@@ -47,12 +49,11 @@ export function EditEventDialog({
     startDateTime: formatForInput(event.startDateTime),
     endDateTime: formatForInput(event.endDateTime),
     location: event.location,
-    isOnline: event.isOnline, // Boolean
-    maxAttendees: event.maxAttendees || 0, // Usamos 0 para representar "sin límite" visualmente
-    coverImageUrl: event.coverImageUrl || "",
+    isOnline: event.isOnline,
+    maxAttendees: event.maxAttendees || 0,
+    coverImageUrl: event.coverImageUrl || null,
   });
 
-  // Manejador genérico para Inputs de texto/número
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -60,7 +61,6 @@ export function EditEventDialog({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Manejador específico para Checkbox (isOnline)
   const handleCheckChange = (checked: boolean) => {
     setFormData((prev) => ({ ...prev, isOnline: checked }));
   };
@@ -70,20 +70,29 @@ export function EditEventDialog({
     setLoading(true);
 
     try {
+      let finalImageUrl = formData.coverImageUrl;
+
+      if (selectedFile) {
+        try {
+          const uploadResult = await ImageService.uploadImage(selectedFile, "events");
+          finalImageUrl = uploadResult.url;
+        } catch (error) {
+          throw new Error("No se pudo cargar la nueva imagen de portada.");
+        }
+      }
+
       const payload: UpdateEventDto = {
         title: formData.title,
         description: formData.description,
         location: formData.location,
         isOnline: formData.isOnline,
-        coverImageUrl: formData.coverImageUrl || null,
+        coverImageUrl: finalImageUrl, 
 
-        // Convertir fechas de vuelta a ISO completo
         startDateTime: new Date(formData.startDateTime).toISOString(),
         endDateTime: formData.endDateTime
           ? new Date(formData.endDateTime).toISOString()
           : null,
 
-        // Convertir string a number, enviar null si es 0
         maxAttendees:
           Number(formData.maxAttendees) > 0
             ? Number(formData.maxAttendees)
@@ -95,12 +104,13 @@ export function EditEventDialog({
       toast({ title: "Evento actualizado correctamente" });
       onEventUpdated();
       setOpen(false);
-    } catch (error) {
+      setSelectedFile(null);
+    } catch (error: any) {
       console.error(error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "No se pudieron guardar los cambios.",
+        description: error.message || "No se pudieron guardar los cambios.",
       });
     } finally {
       setLoading(false);
@@ -125,7 +135,6 @@ export function EditEventDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="grid gap-6 py-4">
-          {/* Título */}
           <div className="grid gap-2">
             <Label htmlFor="title">Título</Label>
             <Input
@@ -137,7 +146,20 @@ export function EditEventDialog({
             />
           </div>
 
-          {/* Fechas */}
+          {/* Subida de Imagen Diferida */}
+          <div className="space-y-2">
+            <Label>Imagen de Portada</Label>
+            <ImageUpload
+              value={formData.coverImageUrl} // Muestra la imagen actual del evento
+              onChange={(file) => {
+                setSelectedFile(file);
+                // Si el usuario borra la imagen, marcamos la URL actual como null
+                if (file === null) setFormData(prev => ({ ...prev, coverImageUrl: null }));
+              }}
+              disabled={loading}
+            />
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label htmlFor="startDateTime">Inicio</Label>
@@ -162,10 +184,8 @@ export function EditEventDialog({
             </div>
           </div>
 
-          {/* Ubicación y Online */}
           <div className="grid gap-4 border p-4 rounded-md">
             <div className="flex items-center space-x-2">
-              {/* Checkbox */}
               <Checkbox
                 id="isOnline"
                 checked={formData.isOnline}
@@ -178,21 +198,13 @@ export function EditEventDialog({
 
             <div className="grid gap-2">
               <Label htmlFor="location" className="flex items-center gap-2">
-                {formData.isOnline ? (
-                  <Globe className="h-4 w-4" />
-                ) : (
-                  <MapPin className="h-4 w-4" />
-                )}
-                {formData.isOnline
-                  ? "Enlace de la reunión / Plataforma"
-                  : "Dirección física"}
+                {formData.isOnline ? <Globe className="h-4 w-4" /> : <MapPin className="h-4 w-4" />}
+                {formData.isOnline ? "Enlace / Plataforma" : "Dirección física"}
               </Label>
               <Input
                 id="location"
                 name="location"
-                placeholder={
-                  formData.isOnline ? "https://zoom.us/..." : "Calle Falsa 123"
-                }
+                placeholder={formData.isOnline ? "https://zoom.us/..." : "Calle Falsa 123"}
                 value={formData.location}
                 onChange={handleChange}
                 required
@@ -200,11 +212,8 @@ export function EditEventDialog({
             </div>
           </div>
 
-          {/* Capacidad y Descripción */}
           <div className="grid gap-2">
-            <Label htmlFor="maxAttendees">
-              Capacidad Máxima (0 = Ilimitada)
-            </Label>
+            <Label htmlFor="maxAttendees">Capacidad Máxima (0 = Ilimitada)</Label>
             <Input
               id="maxAttendees"
               name="maxAttendees"
@@ -232,6 +241,7 @@ export function EditEventDialog({
               type="button"
               variant="outline"
               onClick={() => setOpen(false)}
+              disabled={loading}
             >
               Cancelar
             </Button>

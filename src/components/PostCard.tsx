@@ -7,7 +7,6 @@ import {
   Heart,
   MessageCircle,
   Share2,
-  MoreHorizontal,
   Calendar,
   Users,
 } from "lucide-react";

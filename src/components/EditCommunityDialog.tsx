@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, Edit, ImageIcon } from "lucide-react";
+import { Loader2, Edit } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 import {
@@ -19,7 +19,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 import { CommunityService } from "@/services/community.service";
+import { ImageService } from "@/services/image.service";
 import { CommunityDto, UpdateCommunityDto } from "@/types";
+import { ImageUpload } from "./ImageUpload";
 
 interface EditCommunityDialogProps {
   community: CommunityDto;
@@ -32,13 +34,13 @@ export function EditCommunityDialog({
 }: EditCommunityDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const { toast } = useToast();
 
-  // Estado inicial del formulario basado en la comunidad actual
-  const [formData, setFormData] = useState<UpdateCommunityDto>({
+  const [formData, setFormData] = useState({
     name: community.name,
     description: community.description,
-    coverImageUrl: community.coverImageUrl || "",
+    coverImageUrl: community.coverImageUrl || null,
   });
 
   const handleChange = (
@@ -53,24 +55,33 @@ export function EditCommunityDialog({
     setLoading(true);
 
     try {
-      // Usamos el servicio que definiste
+      let finalImageUrl = formData.coverImageUrl;
+
+      if (selectedFile) {
+        try {
+          const uploadResult = await ImageService.uploadImage(selectedFile, "communities");
+          finalImageUrl = uploadResult.url;
+        } catch (error) {
+          throw new Error("No se pudo cargar la nueva imagen de portada.");
+        }
+      }
+
       await CommunityService.updateCommunity(community.id, {
         name: formData.name,
         description: formData.description,
-        coverImageUrl: formData.coverImageUrl || null, 
+        coverImageUrl: finalImageUrl,
       });
 
       toast({ title: "Comunidad actualizada correctamente" });
-
       onCommunityUpdated();
-
       setOpen(false);
-    } catch (error) {
+      setSelectedFile(null);
+    } catch (error: any) {
       console.error(error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "No se pudieron guardar los cambios.",
+        description: error.message || "No se pudieron guardar los cambios.",
       });
     } finally {
       setLoading(false);
@@ -120,23 +131,17 @@ export function EditCommunityDialog({
             />
           </div>
 
-          {/* Imagen de Portada (URL) */}
-          <div className="grid gap-2">
-            <Label htmlFor="coverImageUrl" className="flex items-center gap-2">
-              <ImageIcon className="h-4 w-4" /> URL de Portada
-            </Label>
-            <Input
-              id="coverImageUrl"
-              name="coverImageUrl"
-              value={formData.coverImageUrl || ""}
-              onChange={handleChange}
-              placeholder="https://ejemplo.com/imagen.jpg"
+          {/* Imagen de Portada*/}
+          <div className="space-y-2">
+            <Label>Imagen de Portada</Label>
+            <ImageUpload
+              value={formData.coverImageUrl}
+              onChange={(file) => {
+                setSelectedFile(file);
+                if (file === null) setFormData(prev => ({ ...prev, coverImageUrl: null }));
+              }}
+              disabled={loading}
             />
-            {formData.coverImageUrl && (
-              <p className="text-xs text-muted-foreground truncate">
-                Vista previa disponible al guardar.
-              </p>
-            )}
           </div>
 
           <DialogFooter>
@@ -144,6 +149,7 @@ export function EditCommunityDialog({
               type="button"
               variant="ghost"
               onClick={() => setOpen(false)}
+              disabled={loading}
             >
               Cancelar
             </Button>

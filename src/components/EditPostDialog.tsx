@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, Edit, ImageIcon } from "lucide-react";
+import { Loader2, Edit } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 import {
@@ -14,12 +14,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 import { PostService } from "@/services/post.service";
+import { ImageService } from "@/services/image.service";
 import { PostDto } from "@/types";
+import { ImageUpload } from "@/components/ImageUpload";
 
 interface EditPostDialogProps {
   post: PostDto;
@@ -29,30 +30,43 @@ interface EditPostDialogProps {
 export function EditPostDialog({ post, onPostUpdated }: EditPostDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const { toast } = useToast();
 
   const [content, setContent] = useState(post.content);
-  const [imageUrl, setImageUrl] = useState(post.imageUrl || "");
+  const [currentImageUrl, setCurrentImageUrl] = useState(post.imageUrl);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
+      let finalImageUrl = currentImageUrl;
+
+      if (selectedFile) {
+        try {
+          const uploadResult = await ImageService.uploadImage(selectedFile, "posts");
+          finalImageUrl = uploadResult.url;
+        } catch (error) {
+          throw new Error("No se pudo cargar la nueva imagen.");
+        }
+      }
+
       await PostService.updatePost(post.id, {
         content,
-        imageUrl: imageUrl || null,
+        imageUrl: finalImageUrl, //
       });
 
       toast({ title: "Post actualizado" });
-      onPostUpdated(); // Refrescar vista
+      onPostUpdated();
       setOpen(false);
-    } catch (error) {
+      setSelectedFile(null);
+    } catch (error: any) {
       console.error(error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "No se pudo editar el post.",
+        description: error.message || "No se pudo editar el post.",
       });
     } finally {
       setLoading(false);
@@ -62,7 +76,6 @@ export function EditPostDialog({ post, onPostUpdated }: EditPostDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {/* Aquí puedes cambiar el botón por un Icono si prefieres */}
         <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
           <Edit className="h-4 w-4 text-muted-foreground hover:text-foreground" />
           <span className="sr-only">Editar Post</span>
@@ -77,7 +90,7 @@ export function EditPostDialog({ post, onPostUpdated }: EditPostDialogProps) {
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="grid gap-4 py-4">
+        <form onSubmit={handleSubmit} className="grid gap-6 py-4">
           {/* Contenido del Post */}
           <div className="grid gap-2">
             <Label htmlFor="content">Contenido</Label>
@@ -90,16 +103,16 @@ export function EditPostDialog({ post, onPostUpdated }: EditPostDialogProps) {
             />
           </div>
 
-          {/* Imagen (URL por ahora) */}
-          <div className="grid gap-2">
-            <Label htmlFor="image" className="flex items-center gap-2">
-              <ImageIcon className="h-4 w-4" /> URL de Imagen (Opcional)
-            </Label>
-            <Input
-              id="image"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              placeholder="https://..."
+          {/* Imagen de la publicación */}
+          <div className="space-y-2">
+            <Label>Imagen de la publicación</Label>
+            <ImageUpload
+              value={currentImageUrl}
+              onChange={(file) => {
+                setSelectedFile(file);
+                if (file === null) setCurrentImageUrl(null);
+              }}
+              disabled={loading}
             />
           </div>
 
@@ -108,12 +121,13 @@ export function EditPostDialog({ post, onPostUpdated }: EditPostDialogProps) {
               type="button"
               variant="ghost"
               onClick={() => setOpen(false)}
+              disabled={loading}
             >
               Cancelar
             </Button>
             <Button type="submit" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Guardar
+              Guardar Cambios
             </Button>
           </DialogFooter>
         </form>
