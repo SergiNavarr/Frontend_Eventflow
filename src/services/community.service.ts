@@ -85,6 +85,20 @@ export const CommunityService = {
     if (!response.ok) throw new Error('Error al obtener comunidades');
     return response.json();
   },
+  
+  getCommunitiesByUser: async (targetUserId: number): Promise<CommunityDto[]> => {
+    const response = await fetch(`${API_URL}/communities/user/${targetUserId}`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Error al obtener las comunidades del usuario');
+    }
+
+    return response.json();
+  },
 
   // Buscar comunidades por nombre
   searchCommunities: async (query: string): Promise<CommunityDto[]> => {

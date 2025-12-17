@@ -16,7 +16,7 @@ import { useAuth } from "@/context/AuthContext";
 import { CreateCommunityDialog } from "@/components/CreateCommunityDialog";
 
 export default function CommunitiesPage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { toast } = useToast();
   
   const [communities, setCommunities] = useState<CommunityDto[]>([]);
@@ -25,8 +25,12 @@ export default function CommunitiesPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchCommunities();
-  }, []);
+    if (isAuthenticated && user?.id) {
+      fetchCommunities(user.id);
+    } else if (!isAuthenticated) {
+      setLoading(false);
+    }
+  }, [isAuthenticated, user?.id]);
 
   useEffect(() => {
     const results = communities.filter(c =>
@@ -36,17 +40,16 @@ export default function CommunitiesPage() {
     setFilteredCommunities(results);
   }, [searchTerm, communities]);
 
-  const fetchCommunities = async () => {
+  const fetchCommunities = async (userId: number) => {
     try {
       setLoading(true);
-
-      const data = await CommunityService.getAllCommunities();
+      const data = await CommunityService.getCommunitiesByUser(userId);
       setCommunities(data);
     } catch (error) {
       console.error(error);
       toast({
         title: "Error",
-        description: "No se pudieron cargar las comunidades.",
+        description: "No se pudieron cargar tus comunidades.",
         variant: "destructive",
       });
     } finally {
