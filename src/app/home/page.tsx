@@ -1,35 +1,35 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Loader2, Sparkles } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Loader2, Sparkles } from "lucide-react";
 
 // Componentes
-import { PostCard } from '@/components/PostCard';
-import { CreatePostWidget } from '@/components/CreatePostWidget';
-import { Sidebar } from '@/components/Sidebar';
-import { BottomNav } from '@/components/BottomNav';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { useToast } from '@/components/ui/use-toast';
+import { PostCard } from "@/components/PostCard";
+import { CreatePostWidget } from "@/components/CreatePostWidget";
+import { Sidebar } from "@/components/Sidebar";
+import { BottomNav } from "@/components/BottomNav";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useToast } from "@/components/ui/use-toast";
 
-import { PostService } from '@/services/post.service';
-import { PostDto } from '@/types';
-import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
+import { PostService } from "@/services/post.service";
+import { PostDto } from "@/types";
+import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 
 const Home = () => {
   const [posts, setPosts] = useState<PostDto[]>([]);
   const [loading, setLoading] = useState(true);
-  const [greeting, setGreeting] = useState('');
-  const [page, setPage] = useState(1); 
-  const [hasMore, setHasMore] = useState(true); 
+  const [greeting, setGreeting] = useState("");
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     const hour = new Date().getHours();
-    if (hour < 12) setGreeting('Buenos Días');
-    else if (hour < 18) setGreeting('Buenas Tardes');
-    else setGreeting('Buenas Noches');
+    if (hour < 12) setGreeting("Buenos Días");
+    else if (hour < 18) setGreeting("Buenas Tardes");
+    else setGreeting("Buenas Noches");
 
     fetchPosts();
   }, []);
@@ -48,13 +48,12 @@ const Home = () => {
         setHasMore(true);
         setPage(2);
       }
-
     } catch (error) {
-      console.error('Error fetching posts:', error);
+      console.error("Error fetching posts:", error);
       toast({
-        title: 'Error',
-        description: 'No se pudieron cargar las publicaciones.',
-        variant: 'destructive',
+        title: "Error",
+        description: "No se pudieron cargar las publicaciones.",
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -77,9 +76,12 @@ const Home = () => {
       } else {
         setPage((prevPage) => prevPage + 1);
       }
-
     } catch (error) {
-      toast({ title: 'Error', description: 'No se pudieron cargar más posts.', variant: 'destructive' });
+      toast({
+        title: "Error",
+        description: "No se pudieron cargar más posts.",
+        variant: "destructive",
+      });
     } finally {
       setLoadingMore(false);
     }
@@ -115,7 +117,6 @@ const Home = () => {
         {/* Feed Area */}
         <ScrollArea className="h-full">
           <div className="mx-auto max-w-2xl px-4 py-6">
-
             {/* Widget para crear Post */}
             <div className="mb-6">
               <CreatePostWidget onPostCreated={fetchPosts} />
@@ -126,7 +127,7 @@ const Home = () => {
               <div className="flex min-h-[400px] items-center justify-center">
                 <motion.div
                   animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                 >
                   <Sparkles className="h-12 w-12 text-primary" />
                 </motion.div>

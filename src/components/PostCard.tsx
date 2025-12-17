@@ -27,6 +27,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { CommentsDialog } from "./CommentsDialog";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import { EditPostDialog } from "@/components/EditPostDialog";
 
 interface PostCardProps {
   post: PostDto;
@@ -35,6 +38,10 @@ interface PostCardProps {
 
 export const PostCard = ({ post, delay = 0 }: PostCardProps) => {
   const { toast } = useToast();
+  const router = useRouter();
+  const { user } = useAuth();
+
+  const isAuthor = user?.id === post.authorId;
 
   const [isLiked, setIsLiked] = useState(post.isLikedByMe);
   const [likesCount, setLikesCount] = useState(post.likesCount);
@@ -79,8 +86,8 @@ export const PostCard = ({ post, delay = 0 }: PostCardProps) => {
       transition={{ duration: 0.4, delay: delay * 0.1 }}
     >
       <Card className="overflow-hidden border-border/40 bg-card/50 backdrop-blur-sm transition-all hover:border-border/80 hover:shadow-sm">
-        <CardHeader className="flex flex-row items-gap-4 p-4 pb-2">
-          {/* Avatar del Autor */}
+        <CardHeader className="flex flex-row items-start justify-between p-4 pb-2">
+          {/* BLOQUE IZQUIERDO: Avatar e Info */}
           <Link
             href={`/profile/${post.authorId}`}
             className="flex items-center gap-3 group cursor-pointer"
@@ -106,25 +113,34 @@ export const PostCard = ({ post, delay = 0 }: PostCardProps) => {
                 })}
               </span>
             </div>
-
-            {post.communityId && post.communityName && (
-              <div className="mb-3">
-                <Link href={`/communities/${post.communityId}`}>
-                  <Badge
-                    variant="secondary"
-                    className="cursor-pointer hover:bg-secondary/80 transition-colors gap-1 pl-2 pr-3 py-1 text-foreground"
-                  >
-                    {/* Icono de Usuarios para representar Comunidad */}
-                    <Users className="h-3 w-3" />
-
-                    <span className="font-normal ml-1">Comunidad:</span>
-
-                    <span className="font-bold ml-1">{post.communityName}</span>
-                  </Badge>
-                </Link>
-              </div>
-            )}
           </Link>
+
+          {/* BLOQUE DERECHO: Acciones (Editar) y Badges */}
+          <div className="flex flex-col items-end gap-2">
+            {/* 1. Botón de Editar (Solo si es autor) */}
+            {isAuthor && (
+              <EditPostDialog
+                post={post}
+                onPostUpdated={() => router.refresh()}
+              />
+            )}
+
+            {/* 2. Badge de Comunidad (Movido aquí para mejor orden, o puedes dejarlo donde estaba) */}
+            {post.communityId && post.communityName && (
+              <Link href={`/communities/${post.communityId}`}>
+                <Badge
+                  variant="secondary"
+                  className="cursor-pointer hover:bg-secondary/80 transition-colors gap-1 pl-2 pr-3 py-1 text-foreground"
+                >
+                  <Users className="h-3 w-3" />
+                  <span className="font-normal ml-1 hidden sm:inline">
+                    Comunidad:
+                  </span>
+                  <span className="font-bold ml-1">{post.communityName}</span>
+                </Badge>
+              </Link>
+            )}
+          </div>
         </CardHeader>
 
         <CardContent className="space-y-3 pb-3">
@@ -147,8 +163,6 @@ export const PostCard = ({ post, delay = 0 }: PostCardProps) => {
               </Link>
             </div>
           )}
-
-
 
           {/* Contenido Texto */}
           <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">
@@ -175,10 +189,11 @@ export const PostCard = ({ post, delay = 0 }: PostCardProps) => {
             <Button
               variant="ghost"
               size="sm"
-              className={`gap-2 ${isLiked
+              className={`gap-2 ${
+                isLiked
                   ? "text-red-500 hover:text-red-600 hover:bg-red-50"
                   : "text-muted-foreground hover:text-primary"
-                }`}
+              }`}
               onClick={handleLike}
               disabled={isLikeLoading}
             >

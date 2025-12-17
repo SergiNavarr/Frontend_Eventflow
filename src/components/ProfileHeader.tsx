@@ -11,12 +11,14 @@ import {
   Edit,
   UserPlus,
   Check,
+  UserCog,
 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useState, useEffect } from "react";
 import { UserService } from "@/services/user.service";
 import { FollowersDialog } from "@/components/FollowersDialog";
+import { EditProfileDialog } from "@/components/EditProfileDialog";
 
 interface ProfileHeaderProps {
   profile: UserProfileDto;
@@ -43,7 +45,7 @@ export const ProfileHeader = ({
     const wasFollowing = isFollowing;
 
     setIsFollowing(!wasFollowing);
-    
+
     setFollowersCount((prev) => (wasFollowing ? prev - 1 : prev + 1));
 
     try {
@@ -52,7 +54,7 @@ export const ProfileHeader = ({
       } else {
         await UserService.unfollowUser(profile.id);
       }
-      onProfileUpdate(); 
+      onProfileUpdate();
     } catch (error) {
       console.error("Error al seguir/dejar de seguir", error);
       // Revertir cambios en caso de error
@@ -63,8 +65,7 @@ export const ProfileHeader = ({
 
   return (
     <div className="relative mb-6">
-      <div className="h-32 w-full overflow-hidden rounded-t-xl bg-gradient-to-r from-primary/20 to-primary/5 md:h-48">
-      </div>
+      <div className="h-32 w-full overflow-hidden rounded-t-xl bg-gradient-to-r from-primary/20 to-primary/5 md:h-48"></div>
 
       <div className="px-4 pb-4">
         <div className="relative flex flex-col items-start">
@@ -94,10 +95,12 @@ export const ProfileHeader = ({
             {/* Botones de Acción Dinámicos */}
             <div className="flex gap-2">
               {isOwnProfile ? (
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Edit className="h-4 w-4" />
-                  Editar Perfil
-                </Button>
+                <EditProfileDialog user={profile} onUpdate={onProfileUpdate}>
+                  <Button className="w-full md:w-auto">
+                    <UserCog className="mr-2 h-4 w-4" />
+                    Editar Perfil
+                  </Button>
+                </EditProfileDialog>
               ) : (
                 <Button
                   variant={isFollowing ? "secondary" : "default"}
