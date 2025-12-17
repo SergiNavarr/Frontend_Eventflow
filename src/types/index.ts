@@ -205,3 +205,13 @@ export interface AuthResponse {
   username: string; // Coincide con public string Username
   email: string; // Coincide con public string Email
 }
+
+export interface ImageUploadDto {
+  imageBase64: string;
+  folder?: string;
+}
+
+export interface ImageUploadResponseDto {
+  url: string;
+  publicId: string;
+}

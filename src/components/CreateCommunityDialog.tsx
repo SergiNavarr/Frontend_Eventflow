@@ -21,53 +21,88 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
+import { ImageUpload } from "@/components/ImageUpload";
+import { PostService, ImageService } from "@/services/api";
 
 export function CreateCommunityDialog() {
   const router = useRouter();
   const { toast } = useToast();
-  
+
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
   // Estado del formulario
   const [formData, setFormData] = useState<CreateCommunityDto>({
     name: "",
     description: "",
-    coverImageUrl: "", // Opcional
+    coverImageUrl: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validaciones básicas
     if (!formData.name.trim() || !formData.description.trim()) return;
     if (formData.name.length > 50) {
-        toast({ title: "Nombre muy largo", description: "Máximo 50 caracteres.", variant: "destructive" });
-        return;
+      toast({ title: "Nombre muy largo", description: "Máximo 50 caracteres.", variant: "destructive" });
+      return;
     }
 
     setIsSubmitting(true);
 
     try {
-      // 1. Llamar al servicio
-      // Enviamos null o undefined si el string de imagen está vacío para que el back no guarde ""
+      let finalImageUrl = null;
+
+      // 1. SUBIDA DIFERIDA DE IMAGEN
+      // Si el usuario seleccionó un archivo local en el componente ImageUpload, lo subimos ahora.
+      // Asumimos que 'selectedFile' es el estado que guarda el objeto File.
+      if (selectedFile) {
+        try {
+          const uploadResult = await ImageService.uploadImage(selectedFile, "communities");
+          finalImageUrl = uploadResult.url;
+        } catch (uploadError: any) {
+          // Si falla la imagen, lanzamos error para no crear la comunidad sin imagen si el usuario la puso
+          throw new Error("Error al cargar la imagen de portada. Inténtalo de nuevo.");
+        }
+      }
+
+      // 2. CREACIÓN DE LA COMUNIDAD
       const payload = {
         ...formData,
-        coverImageUrl: formData.coverImageUrl || null
+        coverImageUrl: finalImageUrl || null
       };
 
       const newCommunity = await CommunityService.createCommunity(payload);
 
-      // 2. Éxito
+      // 3. CREACIÓN AUTOMÁTICA DE POST (Chained Request)
+      // Creamos un post en el feed anunciando la nueva comunidad sin tocar el backend.
+      try {
+        await PostService.createPost({
+          content: `¡Acabo de fundar la comunidad "${newCommunity.name}"! 🚀\n\n${newCommunity.description.substring(0, 150)}...\n\n¡Únanse para participar!`,
+          communityId: newCommunity.id,
+          imageUrl: newCommunity.coverImageUrl // Reutilizamos la misma imagen
+        });
+      } catch (postError) {
+        // Error silencioso: si el post automático falla, no queremos interrumpir la experiencia
+        // del usuario ya que la comunidad SÍ se creó correctamente.
+        console.error("La comunidad se creó pero el post automático falló:", postError);
+      }
+
+      // 4. ÉXITO Y LIMPIEZA
       toast({
         title: "¡Comunidad creada!",
         description: `Has creado "${newCommunity.name}" exitosamente.`,
       });
 
-      setOpen(false); 
+      setOpen(false);
+      // Reseteamos estados
       setFormData({ name: "", description: "", coverImageUrl: "" });
+      if (typeof setSelectedFile === 'function') setSelectedFile(null);
 
+      // Redirigir y refrescar para mostrar el nuevo post en el feed
       router.push(`/communities/${newCommunity.id}`);
+      router.refresh();
 
     } catch (error: any) {
       console.error(error);
@@ -89,7 +124,7 @@ export function CreateCommunityDialog() {
           Crear Comunidad
         </Button>
       </DialogTrigger>
-      
+
       <DialogContent className="sm:max-w-[500px] border-border/80 bg-background/95 backdrop-blur-xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
@@ -102,7 +137,7 @@ export function CreateCommunityDialog() {
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6 py-4">
-          
+
           {/* Nombre */}
           <div className="space-y-2">
             <Label htmlFor="name">Nombre</Label>
@@ -133,32 +168,30 @@ export function CreateCommunityDialog() {
             </p>
           </div>
 
-          {/* URL de Imagen (Opcional) */}
+
           <div className="space-y-2">
             <Label htmlFor="image" className="flex items-center gap-2">
               <ImageIcon className="h-4 w-4" /> Imagen de Portada (URL)
             </Label>
-            <Input
-              id="image"
-              placeholder="https://..."
-              value={formData.coverImageUrl || ""}
-              onChange={(e) => setFormData({ ...formData, coverImageUrl: e.target.value })}
+            <ImageUpload
+              onChange={(file) => setSelectedFile(file)}
+              disabled={isSubmitting}
             />
           </div>
-          
+
           {/* Preview pequeña si hay imagen */}
           {formData.coverImageUrl && (
-             <div className="rounded-md overflow-hidden h-24 w-full bg-muted border border-border">
-                <img src={formData.coverImageUrl} alt="Preview" className="h-full w-full object-cover opacity-80" />
-             </div>
+            <div className="rounded-md overflow-hidden h-24 w-full bg-muted border border-border">
+              <img src={formData.coverImageUrl} alt="Preview" className="h-full w-full object-cover opacity-80" />
+            </div>
           )}
 
           <DialogFooter>
-            <Button 
-                type="button" 
-                variant="ghost" 
-                onClick={() => setOpen(false)}
-                disabled={isSubmitting}
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setOpen(false)}
+              disabled={isSubmitting}
             >
               Cancelar
             </Button>

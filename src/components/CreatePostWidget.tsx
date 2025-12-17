@@ -2,21 +2,22 @@
 
 import { useState } from 'react';
 import { Send, Image as ImageIcon, Loader2 } from 'lucide-react';
-import { PostService } from '@/services/post.service';
-import { CreatePostDto } from '@/types';
+import { PostService } from '@/services/api';
+import { ImageService } from '@/services/api';
+import { CreatePostDto } from '@/types'; //
 
-// Componentes UI (Asumiendo que los tienes en tu carpeta de UI)
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
+import { ImageUpload } from "@/components/ImageUpload";
 
 interface CreatePostWidgetProps {
-  onPostCreated?: () => void; // Callback para recargar el feed
-  communityId?: number;       // Opcional: Si estamos en una comunidad
-  eventId?: number;           // Opcional: Si estamos en un evento
-  userAvatarUrl?: string;     // Opcional: Para mostrar en el avatar del input
+  onPostCreated?: () => void; 
+  communityId?: number;       
+  eventId?: number;           
+  userAvatarUrl?: string;     
 }
 
 export const CreatePostWidget = ({ 
@@ -26,8 +27,9 @@ export const CreatePostWidget = ({
   userAvatarUrl 
 }: CreatePostWidgetProps) => {
   const [content, setContent] = useState('');
-  const [imageUrl, setImageUrl] = useState<string | null>(null); // Por ahora manejaremos URL directa o null
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showImageUpload, setShowImageUpload] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = async () => {
@@ -36,36 +38,44 @@ export const CreatePostWidget = ({
     setIsSubmitting(true);
 
     try {
-      // 1. Construir el DTO
+      let uploadedImageUrl = null;
+
+      if (selectedFile) {
+        try {
+          const result = await ImageService.uploadImage(selectedFile, "posts");
+          uploadedImageUrl = result.url;
+        } catch (error) {
+          throw new Error("No se pudo subir la imagen. Inténtalo de nuevo.");
+        }
+      }
+
       const postData: CreatePostDto = {
         content: content,
-        imageUrl: imageUrl || undefined, // Si es null, enviamos undefined
+        imageUrl: uploadedImageUrl, 
         communityId: communityId || undefined,
         eventId: eventId || undefined
       };
 
-      // 2. Llamar al servicio
       await PostService.createPost(postData);
 
-      // 3. Éxito: Limpiar y notificar
       setContent('');
-      setImageUrl(null);
+      setSelectedFile(null);
+      setShowImageUpload(false);
       
       toast({
         title: "¡Publicado!",
         description: "Tu publicación se ha creado correctamente.",
       });
 
-      // 4. Avisar al componente padre (Home) para que actualice la lista
       if (onPostCreated) {
         onPostCreated();
       }
 
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       toast({
         title: "Error",
-        description: "No se pudo crear la publicación. Inténtalo de nuevo.",
+        description: error.message || "No se pudo crear la publicación.",
         variant: "destructive",
       });
     } finally {
@@ -73,10 +83,8 @@ export const CreatePostWidget = ({
     }
   };
 
-  // Manejo simulado de imagen (ya que el backend espera un string URL)
-  const handleImageClick = () => {
-    const url = prompt("Ingresa la URL de la imagen (Demo):");
-    if (url) setImageUrl(url);
+  const handleToggleImage = () => {
+    setShowImageUpload(!showImageUpload);
   };
 
   return (
@@ -84,7 +92,6 @@ export const CreatePostWidget = ({
       <CardContent className="p-4">
         <div className="flex gap-4">
           <Avatar className="h-10 w-10 border border-border/50">
-            {/* Si no hay avatar, mostramos fallback */}
             <AvatarImage src={userAvatarUrl} />
             <AvatarFallback>YO</AvatarFallback>
           </Avatar>
@@ -103,31 +110,28 @@ export const CreatePostWidget = ({
               className="min-h-[80px] resize-none border-none bg-transparent p-0 placeholder:text-muted-foreground focus-visible:ring-0"
             />
             
-            {/* Previsualización de imagen adjunta */}
-            {imageUrl && (
-              <div className="relative rounded-lg overflow-hidden border border-border/50 bg-muted max-h-40 w-fit">
-                <img src={imageUrl} alt="Preview" className="h-40 w-auto object-cover" />
-                <Button 
-                  variant="destructive" 
-                  size="sm" 
-                  className="absolute top-1 right-1 h-6 w-6 p-0 rounded-full"
-                  onClick={() => setImageUrl(null)}
-                >
-                  ×
-                </Button>
+            {(showImageUpload || selectedFile) && (
+              <div className="pt-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                <ImageUpload
+                  onChange={(file) => {
+                    setSelectedFile(file);
+                    if (!file) setShowImageUpload(false);
+                  }}
+                  disabled={isSubmitting}
+                />
               </div>
             )}
 
             <div className="flex items-center justify-between border-t border-border/40 pt-3">
               <div className="flex gap-2">
                 <Button 
-                  variant="ghost" 
+                  variant={showImageUpload || selectedFile ? "secondary" : "ghost"} 
                   size="sm" 
-                  className="text-muted-foreground hover:text-primary"
-                  onClick={handleImageClick}
+                  className={`gap-2 ${!(showImageUpload || selectedFile) && "text-muted-foreground hover:text-primary"}`}
+                  onClick={handleToggleImage}
                 >
-                  <ImageIcon className="mr-2 h-4 w-4" />
-                  <span className="text-xs">Foto</span>
+                  <ImageIcon className="h-4 w-4" />
+                  <span className="text-xs font-medium">Foto</span>
                 </Button>
               </div>
 
