@@ -23,18 +23,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
   const { toast } = useToast();
 
-  // Al cargar la app, verificamos si hay token y recuperamos el usuario
+
   useEffect(() => {
     const initAuth = async () => {
       const token = localStorage.getItem('token');
       if (token) {
         try {
-          // Usamos el servicio que definimos para obtener "mi perfil"
           const userProfile = await UserService.getProfile(); 
           setUser(userProfile);
         } catch (error) {
           console.error("Sesión expirada o inválida", error);
-          logout(); // Si falla, limpiamos todo
+          logout(); 
         }
       }
       setIsLoading(false);
@@ -45,22 +44,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (data: UserLoginDto) => {
     try {
-      // 1. Llamamos al endpoint de Login
       const response = await UserService.login(data);
-      
-      // 2. Guardamos el token recibido
-      // Nota: Asegúrate de que response.token exista. 
-      // Si tu back devuelve { "token": "..." } usa response.token
+
+
       if (!response.token) throw new Error("No se recibió token del servidor");
       
       localStorage.setItem('token', response.token);
       
-      // 3. ¡CORRECCIÓN AQUÍ! 
-      // En lugar de usar response.user, hacemos fetch del perfil con el token nuevo.
-      // Esto asegura que tengamos el objeto UserProfileDto completo y correcto.
       const userProfile = await UserService.getProfile(); 
       
-      // 4. Guardamos el usuario en el estado
       setUser(userProfile);
       
       toast({ title: "Bienvenido de nuevo", description: `Hola, ${userProfile.username}!` });
@@ -73,7 +65,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         description: error.message || "Credenciales incorrectas", 
         variant: "destructive" 
       });
-      // Importante: Si falló algo después de guardar el token (ej: getProfile), limpiar.
       localStorage.removeItem('token');
       setUser(null);
       throw error;
@@ -84,7 +75,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       await UserService.register(data);
       toast({ title: "Cuenta creada", description: "Ahora puedes iniciar sesión." });
-      // Opcional: Auto-login aquí o redirigir a /login
       router.push('/login');
     } catch (error: any) {
       toast({ 
